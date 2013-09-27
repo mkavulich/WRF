@@ -332,7 +332,7 @@ END IF
                              iv % radar(n) % rgro(k) = exp ( log(rze1/zg )/1.75 )/model_rho(k,n)
                              iv % radar(n) % rsn(k) % qc = 0
                              iv % radar(n) % rgr(k) % qc = 0
-                             print*,"tc,qs,qg= ",model_tc(k,n),iv % radar(n) % rsno(k),iv % radar(n) % rgro(k),ob % radar(n) % rf(k)
+                             !print*,"tc,qs,qg= ",model_tc(k,n),iv % radar(n) % rsno(k),iv % radar(n) % rgro(k),ob % radar(n) % rf(k)
                         end if  ! temp
                         !print*,"model tc= ",k,n,model_tc(k,n),iv % radar(n) % rrno(k),iv % radar(n) % rsno(k),iv % radar(n) % rgro(k)
                      end if  ! it=1

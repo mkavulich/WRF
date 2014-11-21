@@ -70,6 +70,7 @@
       USE MODULE_HIFREQ, only : hifreq_open
 #endif
       USE MODULE_DOMAIN
+      USE MODULE_STATE_DESCRIPTION
       USE MODULE_RANDOM, only : srand_grid, rand_grid_r4
       USE MODULE_DRIVER_CONSTANTS
       USE module_model_constants
@@ -218,6 +219,9 @@
 #ifndef WRF_CHEM
       REAL,ALLOCATABLE,DIMENSION(:,:,:) :: CLDFRA_OLD
 #endif
+!..Need to fill special height var for setting up initial condition.  G. Thompson
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: z_at_q
+
 #if 0
       REAL,ALLOCATABLE,DIMENSION(:,:,:) :: w0avg
 #endif
@@ -1787,15 +1791,16 @@
       ALLOCATE(RTHRATEN(IMS:IME,KMS:KME,JMS:JME),STAT=I)    ; RTHRATEN  = 0.
       ALLOCATE(RTHRATENLW(IMS:IME,KMS:KME,JMS:JME),STAT=I)  ; RTHRATENLW = 0.
       ALLOCATE(RTHRATENSW(IMS:IME,KMS:KME,JMS:JME),STAT=I)  ; RTHRATENSW = 0.
-      ALLOCATE(ZINT(IMS:IME,KMS:KME,JMS:JME),STAT=I)  ; ZINT = 0.
-      ALLOCATE(CONVFAC(IMS:IME,KMS:KME,JMS:JME),STAT=I)  ; CONVFAC = 0.
+      ALLOCATE(ZINT(IMS:IME,KMS:KME,JMS:JME),STAT=I)        ; ZINT = 0.
+      ALLOCATE(CONVFAC(IMS:IME,KMS:KME,JMS:JME),STAT=I)     ; CONVFAC = 0.
       ALLOCATE(PINT_TRANS(IMS:IME,KMS:KME,JMS:JME),STAT=I)  ; PINT_TRANS = 0.
-      ALLOCATE(T_TRANS(IMS:IME,KMS:KME,JMS:JME),STAT=I)  ;  T_TRANS = 0.
-      ALLOCATE(RRI(IMS:IME,KMS:KME,JMS:JME),STAT=I)  ;  RRI = 0.
-      ALLOCATE(CLDFRA_TRANS(IMS:IME,KMS:KME,JMS:JME),STAT=I)  ; CLDFRA_TRANS = 0.
+      ALLOCATE(T_TRANS(IMS:IME,KMS:KME,JMS:JME),STAT=I)     ;  T_TRANS = 0.
+      ALLOCATE(RRI(IMS:IME,KMS:KME,JMS:JME),STAT=I)         ;  RRI = 0.
+      ALLOCATE(CLDFRA_TRANS(IMS:IME,KMS:KME,JMS:JME),STAT=I); CLDFRA_TRANS = 0.
 #ifndef WRF_CHEM      
       ALLOCATE(CLDFRA_OLD(IMS:IME,KMS:KME,JMS:JME),STAT=I)  ; CLDFRA_OLD = 0.
 #endif
+      ALLOCATE(Z_AT_Q(IMS:IME,KMS:KME,JMS:JME),STAT=I)      ; z_at_q = 0.
 #if 0
       ALLOCATE(w0avg(IMS:IME,KMS:KME,JMS:JME),STAT=I)       ; w0avg = 0.
 #endif
@@ -1961,6 +1966,8 @@
      &             ,STEPBL,STEPRA,STEPCU                                &
      &             ,grid%w0avg, RAINNC, RAINC, grid%raincv, RAINNCV               &
      &             ,SNOWNC, SNOWNCV, GRAUPELNC, GRAUPELNCV              &
+     &             ,z_at_q, grid%qnwfa2d                                &
+     &             ,scalar(ims,kms,jms,1),num_scalar                    &
      &             ,grid%re_cloud, grid%re_ice, grid%re_snow            & ! G. Thompson
      &             ,grid%has_reqc,grid%has_reqi,grid%has_reqs           & ! G. Thompson
      &             ,NCA,GRID%SWRAD_SCAT                                 &
@@ -1971,7 +1978,8 @@
      &             ,GRID%LANDUSE_ISICE, GRID%LANDUSE_LUCATS             &
      &             ,GRID%LANDUSE_LUSEAS, GRID%LANDUSE_ISN               &
      &             ,GRID%LU_STATE                                       &
-     &             ,grid%xlat,grid%xlong,grid%albedo,grid%albbck                            &
+     &             ,grid%xlat,grid%xlong,grid%glat,grid%glon&
+     &             ,grid%albedo,grid%albbck                             &
      &             ,GRID%GMT,GRID%JULYR,GRID%JULDAY                     &
      &             ,GRID%LEVSIZ, NUM_OZMIXM, NUM_AEROSOLC, GRID%PAERLEV &
      &             ,grid%alevsiz, grid%no_src_types                     &
@@ -2037,14 +2045,20 @@
 !-----------------------------------------------------------------------
 !---- Initialization for gravity wave drag (GWD) & mountain blocking (MB)
 !
-      CALL nl_get_cen_lat(GRID%ID, CEN_LAT)    !-- CEN_LAT in deg
-      CALL nl_get_cen_lon(GRID%ID, CEN_LON)    !-- CEN_LON in deg
-      DTPHS=grid%dt*grid%nphs
-      CALL GWD_init(DTPHS,GRID%DX,GRID%DY,CEN_LAT,CEN_LON,RESTRT        &
+#if (HWRF == 1)
+   IF(grid%gwd_opt .eq. 2 .AND. grid%id .eq. 1 .AND. allowed_to_read) THEN
+#else
+   IF(grid%gwd_opt .eq. 2 ) THEN
+#endif
+        CALL nl_get_cen_lat(GRID%ID, CEN_LAT)    !-- CEN_LAT in deg
+        CALL nl_get_cen_lon(GRID%ID, CEN_LON)    !-- CEN_LON in deg
+        DTPHS=grid%dt*grid%nphs
+        CALL GWD_init(DTPHS,GRID%DX,GRID%DY,CEN_LAT,CEN_LON,RESTRT        &
      &              ,grid%glat,grid%glon,grid%crot,grid%srot,grid%hangl                          &
      &              ,IDS,IDE,JDS,JDE,KDS,KDE                            &
      &              ,IMS,IME,JMS,JME,KMS,KME                            &
      &              ,ITS,ITE,JTS,JTE,KTS,KTE )
+      ENDIF
       IF(.NOT.RESTRT)THEN
         DO J=MYJS,MYJE
         DO I=MYIS,MYIE
@@ -2390,6 +2404,7 @@
 #ifndef WRF_CHEM
       DEALLOCATE(CLDFRA_OLD)
 #endif
+      DEALLOCATE(Z_AT_Q)
 #if 0
       DEALLOCATE(w0avg)
 #endif

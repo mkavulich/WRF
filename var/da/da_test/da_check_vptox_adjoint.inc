@@ -36,7 +36,8 @@ subroutine da_check_vptox_adjoint(grid, ne, be, ep, vp, cv_size)
    real                             :: vp2_v10(ims:ime,jms:jme,kms:kme)
    real                             :: vp2_v11(ims:ime,jms:jme,kms:kme)
 #endif
-   real                             :: vp2_alpha(ims:ime,jms:jme,kms:kme,1:ne)
+!  real                             :: vp2_alpha(ims:ime,jms:jme,kms:kme,1:ne)
+   real                             :: vp2_alpha(ims_int:ime_int,jms_int:jme_int,kms_int:kme_int,1:ne)
 
    if (trace_use) call da_trace_entry("da_check_vptox_adjoint")
 
@@ -300,9 +301,13 @@ subroutine da_check_vptox_adjoint(grid, ne, be, ep, vp, cv_size)
    adj_par_rhs = sum(vp % v11(its:ite,jts:jte,:)* vp2_v11(its:ite,jts:jte,:)) + &
       adj_par_rhs
 #endif
+!  if (be % ne > 0) then
+!     adj_par_rhs = sum(vp % alpha(its:ite,jts:jte,kts:kte,:) * &
+!        vp2_alpha(its:ite,jts:jte,kts:kte,:)) + adj_par_rhs
+!  end if
    if (be % ne > 0) then
-      adj_par_rhs = sum(vp % alpha(its:ite,jts:jte,kts:kte,:) * &
-         vp2_alpha(its:ite,jts:jte,kts:kte,:)) + adj_par_rhs
+      adj_par_rhs = sum(vp % alpha(its_int:ite_int,jts_int:jte_int,kts_int:kte_int,:) * &
+         vp2_alpha(its_int:ite_int,jts_int:jte_int,kts_int:kte_int,:)) + adj_par_rhs
    end if
 
    if ( cv_options == 3 ) adj_par_rhs = sum (cv_2*cv)

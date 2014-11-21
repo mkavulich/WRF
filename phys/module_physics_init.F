@@ -17,6 +17,8 @@ MODULE module_physics_init
    !Local data for CAM's MG MP scheme
    integer  :: ixcldliq, ixcldice, ixnumliq, ixnumice
    LOGICAL  :: CAM_INITIALIZED = .FALSE.
+   LOGICAL  :: WINDFARM_INITIALIZED = .FALSE.
+
 
 CONTAINS
 
@@ -36,6 +38,7 @@ CONTAINS
                          STEPBL,STEPRA,STEPCU,                   &
                          W0AVG, RAINNC, RAINC, RAINCV, RAINNCV,  &
                          SNOWNC, SNOWNCV, GRAUPELNC, GRAUPELNCV, &
+                         z_at_q, qnwfa2d, scalar, num_sc,    & ! G. Thompson
                          re_cloud, re_ice, re_snow,              & ! G. Thompson
                          has_reqc, has_reqi, has_reqs,           & ! G. Thompson
                          NCA,swrad_scat,                         &
@@ -47,7 +50,7 @@ CONTAINS
                          landuse_ISICE, landuse_LUCATS,          &
                          landuse_LUSEAS, landuse_ISN,            &
                          lu_state,                               &
-                         XLAT,XLONG,ALBEDO,ALBBCK,GMT,JULYR,JULDAY,&
+                         XLAT,XLONG,xlong_u,xlat_v,ALBEDO,ALBBCK,GMT,JULYR,JULDAY,&
                          levsiz, n_ozmixm, n_aerosolc, paerlev,  &
                          alevsiz, no_src_types,                  &
                          TMN,XLAND,ZNT,Z0,UST,MOL,PBLH,TKE_PBL,  &
@@ -90,6 +93,10 @@ CONTAINS
                          STMASSXY, WOODXY, STBLCPXY, FASTCPXY,            & ! Optional Noah-MP
                          XSAIXY,                                          & ! Optional Noah-MP
                          T2MVXY, T2MBXY, CHSTARXY ,                       & ! Optional Noah-MP
+                         SMOISEQ  ,SMCWTDXY ,RECHXY, DEEPRECHXY, AREAXY,  & ! Optional Noah-MP 
+                         WTDDT , STEPWTD ,QRFSXY ,QSPRINGSXY ,QSLATXY,    & ! Optional Noah-MP
+                         FDEPTHXY, RIVERBEDXY, EQZWT, RIVERCONDXY, PEXPXY, & ! Optional Noah-MP
+                         msftx, msfty,                           &           ! Optional Noah-MP
 !                        num_roof_layers,num_wall_layers,        & !Optional urban
 !                        num_road_layers,                        & !Optional urban
                          DZR, DZB, DZG,                          & !Optional urban
@@ -170,10 +177,11 @@ CONTAINS
                          nssl_rho_qs,                             &
    ! OPTIONAL 
                          RQCNCUTEN, RQINCUTEN,                   &
-                         rliq                                    &  !BSINGH:01/31/2013 - Added rliq and is_CAMMGMP_used for CAM5 physics
-                         ,te_temf          & ! WA 12/21/09
-                         ,cf3d_temf        & ! WA 9/27/10
-                         ,wm_temf          & ! WA 2/22/11
+                         rliq,                                   &  !BSINGH:01/31/2013 - Added rliq and is_CAMMGMP_used for CAM5 physics
+                         cldfra_dp,cldfra_sh                     & !ckay for subgrid cloud
+                         ,te_temf                                & ! WA 12/21/09
+                         ,cf3d_temf                              & ! WA 9/27/10
+                         ,wm_temf                                & ! WA 2/22/11
                          ,massflux_EDKF, entr_EDKF, detr_EDKF  & ! Optional for qnse
                          ,thl_up, thv_up, rt_up                & ! Optional for qnse
                          ,rv_up, rc_up, u_up, v_up, frac_up    & ! Optional for qnse
@@ -188,6 +196,7 @@ CONTAINS
 #ifdef WRF_CHEM
    USE module_cam_support,         ONLY : cam_mam_aerosols
 #endif
+   USE module_wind_turbdragforce
    IMPLICIT NONE
 !-----------------------------------------------------------------
    TYPE (grid_config_rec_type)              :: config_flags
@@ -214,7 +223,8 @@ CONTAINS
    REAL,     INTENT(IN)        :: swrad_scat
 
    REAL,     DIMENSION( kms:kme ) , INTENT(IN) :: zfull, zhalf
-   REAL,     DIMENSION( ims:ime , jms:jme ) , INTENT(IN) :: TSK, XLAT, XLONG
+   REAL,     DIMENSION( ims:ime , jms:jme ) , INTENT(IN) :: TSK, XLAT, XLONG,xlong_u,xlat_v
+   REAL,  DIMENSION(ims:ime,jms:jme), INTENT(IN) , OPTIONAL :: msftx,msfty
 
    INTEGER,      INTENT(IN   )    ::   levsiz, n_ozmixm
    INTEGER,      INTENT(IN   )    ::   paerlev, n_aerosolc
@@ -277,6 +287,9 @@ CONTAINS
    REAL,     DIMENSION( ims:ime , kms:kme , jms:jme ) , OPTIONAL, INTENT(INOUT) :: &!BSINGH(PNNL)- should be declared inout
              CLDFRA_OLD
 
+   REAL,     DIMENSION( ims:ime , kms:kme , jms:jme ) , OPTIONAL, INTENT(INOUT) :: & ! ckay for subgrid cloud
+             cldfra_dp, cldfra_sh
+
    REAL,     DIMENSION( ims:ime , jms:jme ) , INTENT(INOUT) ::         &
              GSW,ALBEDO,ALBBCK,GLW,EMISS,EMBCK                          !EMBCK new
    REAL,     DIMENSION( ims:ime , jms:jme ) , INTENT(INOUT) ::   SNOALB
@@ -308,6 +321,10 @@ CONTAINS
    REAL,     DIMENSION( ims:ime , jms:jme ) , INTENT(OUT) ::           &
              RAINNC, RAINC, RAINCV, RAINNCV,  &
              SNOWNC, SNOWNCV, GRAUPELNC, GRAUPELNCV
+   REAL,     DIMENSION(ims:ime,kms:kme,jms:jme), INTENT(IN) :: z_at_q                          !  G. Thompson
+   REAL,     DIMENSION(ims:ime,jms:jme), INTENT(INOUT) :: qnwfa2d                    !  G. Thompson
+   INTEGER,  INTENT(IN) :: num_sc                                                !  G. Thompson
+   REAL,     DIMENSION(ims:ime,kms:kme,jms:jme,num_sc), INTENT(INOUT) :: scalar  !  G. Thompson
 
    REAL,     DIMENSION( ims:ime , jms:jme ) , INTENT(OUT) :: CLDEFI, NCA
 
@@ -392,6 +409,22 @@ CONTAINS
    REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme) :: T2MVXY
    REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme) :: T2MBXY
    REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme) :: CHSTARXY
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:num_soil_layers,jms:jme) :: SMOISEQ 
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme) :: SMCWTDXY   
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme) :: DEEPRECHXY
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme) :: RECHXY
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme) :: QRFSXY       
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme) :: QSPRINGSXY
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme) :: QSLATXY 
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme) :: AREAXY
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme), INTENT(IN) :: FDEPTHXY
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme), INTENT(IN) :: RIVERBEDXY
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme), INTENT(IN) :: EQZWT
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme), INTENT(IN) :: RIVERCONDXY
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme), INTENT(IN) :: PEXPXY
+
+   INTEGER , OPTIONAL,  INTENT(OUT) :: STEPWTD
+   REAL , OPTIONAL, INTENT(IN) :: WTDDT
 
 !mp
    REAL,     DIMENSION( ims:ime , kms:kme , jms:jme ) , INTENT(OUT) ::   &
@@ -591,6 +624,7 @@ CONTAINS
    LOGICAL :: usemonalb
    LOGICAL :: rdmaxalb
    INTEGER :: mfshconv
+   INTEGER :: iopt_run
 
    INTEGER :: i, j, k, itf, jtf, ktf, n
 integer myproc
@@ -602,11 +636,21 @@ integer myproc
    rdmaxalb=config_flags%rdmaxalb
    LakeModel = config_flags%LakeModel
    mfshconv=config_flags%mfshconv
+   IF(PRESENT(SMOISEQ)) THEN
+      iopt_run=config_flags%opt_run
+   ELSE
+      iopt_run=-1
+   END IF
 #if ( EM_CORE == 1 )
    obs_twindo_cg=model_config_rec%obs_twindo(1)
    obs_twindo=config_flags%obs_twindo
    oml_hml0=config_flags%oml_hml0
    sf_ocean_physics=config_flags%sf_ocean_physics
+#else
+   obs_twindo_cg=0
+   obs_twindo=0
+   oml_hml0=0
+   omlcall=0
 #endif
 
 !..Added G. Thompson to determine if we will compute and pass radiative
@@ -870,12 +914,21 @@ integer myproc
 !-- cu: cumulus
 !-- mp: microphysics
 
+!
+! .... paj ... initialize wind farm ...
+!
+  IF ( config_flags%windfarm_opt .EQ. 1 ) THEN
+    CALL init_module_wind_turbdragforce(id,config_flags,xlong,xlat,windfarm_initialized,ims,ime,jms,jme,its,ite,jts,jte,ids,ide,jds,jde)
+  ENDIF
+
+
    CALL wrf_debug ( 200 , 'module_start: phy_init: Before call to ra_init' )
 
    CALL ra_init(id=id,STEPRA=STEPRA,RADT=RADT,DT=DT,RTHRATEN=RTHRATEN,RTHRATENLW=RTHRATENLW,             &
                 RTHRATENSW=RTHRATENSW,CLDFRA=CLDFRA,EMISS=EMISS,cen_lat=cen_lat,JULYR=JULYR,JULDAY=JULDAY,GMT=GMT,    &
                 levsiz=levsiz,XLAT=XLAT,XLONG=XLONG,n_ozmixm=n_ozmixm,     &
                 alevsiz=alevsiz,no_src_types=no_src_types,                 &
+                cldfra_dp=cldfra_dp,cldfra_sh=cldfra_sh,                   & ! optional for subgrid cloud by ckay
                 cldfra_old=cldfra_old,                                     & ! Optional
                 ozmixm=ozmixm,pin=pin,                                     & ! Optional
                 aerodm=aerodm,pina=pina,                                   & ! Optional
@@ -904,8 +957,10 @@ integer myproc
                 SNOWH,SH2O,SNOALB,FNDSOILW,FNDSNOWH,RDMAXALB,   &
 #if (NMM_CORE == 1)
                 Z0,XLAND,XICE,                                  &
+                DX,DY,                                          &
 #else
                 ZNT,XLAND,XICE,                                 &
+                DX, DY, MSFTX, MSFTY,                           &
 #endif
                 SFCEVP,GRDFLX,                                  &
                 TRIM (MMINLU_LOC),                              &
@@ -916,8 +971,12 @@ integer myproc
                 WSLAKEXY, ZWTXY, WAXY, WTXY, LFMASSXY, RTMASSXY,&
                 STMASSXY, WOODXY, STBLCPXY, FASTCPXY,           &
                 XSAIXY,                                         &
+                SMOISEQ, SMCWTDXY, RECHXY, DEEPRECHXY, AREAXY,  &
+                WTDDT, STEPWTD, QRFSXY ,QSPRINGSXY ,QSLATXY,   &
+                FDEPTHXY, RIVERBEDXY, EQZWT, RIVERCONDXY, PEXPXY, & 
+                ISICE,                                 &
                 T2MVXY,T2MBXY,CHSTARXY ,                        &
-                allowed_to_read ,                               &
+                allowed_to_read , iopt_run ,                    &
                 start_of_simulation ,                           &
                 lakedepth2d,  savedtke12d,  snowdp2d,   h2osno2d,       & !lake
                 snl2d,        t_grnd2d,     t_lake3d,   lake_icefrac3d, & !lake
@@ -1036,6 +1095,7 @@ integer myproc
                          nssl_cnor, nssl_cnos,                   &
                          nssl_rho_qh, nssl_rho_qhl,              &
                          nssl_rho_qs,                            &
+                z_at_q, qnwfa2d, scalar, num_sc,            &  ! G. Thompson
                 ids, ide, jds, jde, kds, kde,                   &
                 ims, ime, jms, jme, kms, kme,                   &
                 its, ite, jts, jte, kts, kte                    )
@@ -1398,6 +1458,7 @@ integer myproc
                       RTHRATENSW,CLDFRA,EMISS,cen_lat,JULYR,JULDAY,GMT,    &
                       levsiz,XLAT,XLONG,n_ozmixm,                     &
                       alevsiz,no_src_types,                           &
+                      cldfra_dp,cldfra_sh,                            & ! Optional for subgrid cloud by ckay
                       cldfra_old,                                     & ! Optional
                       ozmixm,pin,                                     & ! Optional
                       aerodm,pina,                                    & ! Optional
@@ -1469,6 +1530,11 @@ integer myproc
                                                          RTHRATENSW, &
                                                              CLDFRA
 
+   REAL , DIMENSION( ims:ime , kms:kme , jms:jme ) , INTENT(INOUT) , & ! ckay for subgrid cloud
+                                                         OPTIONAL :: &
+                                                          cldfra_dp, &
+                                                          cldfra_sh
+
    REAL , DIMENSION( ims:ime , kms:kme , jms:jme ) , OPTIONAL, INTENT(INOUT) :: &!BSINGH(PNNL)- should be declared inout
                                                          CLDFRA_OLD
 
@@ -1507,6 +1573,17 @@ integer myproc
      ENDDO
      ENDDO
      ENDDO
+
+     IF( PRESENT(cldfra_dp) ) THEN
+        DO j=jts,jtf
+        DO k=kts,ktf
+        DO i=its,itf
+           cldfra_dp(i,k,j)=0.
+           cldfra_sh(i,k,j)=0.
+        ENDDO
+        ENDDO
+        ENDDO
+     ENDIF
 
      if( present(cldfra_old) ) then
         DO j=jts,jtf
@@ -1727,9 +1804,9 @@ integer myproc
                 IVGTYP,ISLTYP,ISURBAN,SMOIS,SMFR3D,mavail,      &
                 SNOWH,SH2O,SNOALB,FNDSOILW,FNDSNOWH,RDMAXALB,   &
 #if  ( NMM_CORE == 1 )
-                Z0,XLAND,XICE,                                  &
+                Z0,XLAND,XICE,DX,DY,                            &
 #else
-                ZNT,XLAND,XICE,                                 &
+                ZNT,XLAND,XICE,DX, DY, MSFTX, MSFTY,            &
 #endif
                 SFCEVP,GRDFLX,                                  &
                 MMINLU,                                         &
@@ -1740,8 +1817,12 @@ integer myproc
                 WSLAKEXY, ZWTXY, WAXY, WTXY, LFMASSXY, RTMASSXY,&
                 STMASSXY, WOODXY, STBLCPXY, FASTCPXY,           &
                 XSAIXY,                                         &
+                SMOISEQ, SMCWTDXY, RECHXY, DEEPRECHXY, AREAXY,  &
+                WTDDT, STEPWTD,QRFSXY ,QSPRINGSXY ,QSLATXY,     &
+                FDEPTHXY, RIVERBEDXY, EQZWT, RIVERCONDXY, PEXPXY, & 
+                ISICE,                                 &
                 T2MVXY, T2MBXY ,CHSTARXY,                       &
-                allowed_to_read,                                &
+                allowed_to_read, iopt_run ,                     &
                 start_of_simulation,                            &
                 lakedepth2d,  savedtke12d,  snowdp2d,   h2osno2d,       & !lake
                 snl2d,        t_grnd2d,     t_lake3d,   lake_icefrac3d, & !lake
@@ -1873,11 +1954,16 @@ integer myproc
                                       its, ite, jts, jte, kts, kte
    INTEGER , INTENT(IN)        ::     num_soil_layers
    INTEGER , INTENT(IN)        ::     SF_URBAN_PHYSICS 
+   INTEGER , INTENT(IN)        ::     IOPT_RUN
 
 !   INTEGER , INTENT(IN)        ::     LakeModel
    INTEGER         ::     LakeModel
    real, intent(in)            ::      domainlakedepth,lakeminalt
    REAL ,    INTENT(IN)        ::     DT, BLDT
+   REAL ,    INTENT(IN)        ::     DX, DY
+#if (EM_CORE == 1)
+   REAL,    DIMENSION( ims:ime, jms:jme ) ,  INTENT(IN) :: MSFTX,MSFTY
+#endif
    INTEGER , INTENT(INOUT)     ::     STEPBL
 
    REAL,     DIMENSION( ims:ime , 1:num_soil_layers , jms:jme ),    &
@@ -1982,6 +2068,22 @@ integer myproc
    REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme) :: T2MVXY
    REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme) :: T2MBXY
    REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme) :: CHSTARXY
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:num_soil_layers,jms:jme) :: SMOISEQ
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme) :: SMCWTDXY
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme) :: DEEPRECHXY
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme) :: RECHXY
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme) :: QRFSXY  
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme) :: QSPRINGSXY
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme) :: QSLATXY
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme) :: AREAXY
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme), INTENT(IN) :: FDEPTHXY
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme), INTENT(IN) :: RIVERBEDXY
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme), INTENT(IN) :: EQZWT
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme), INTENT(IN) :: RIVERCONDXY
+   REAL,    OPTIONAL, DIMENSION(ims:ime,jms:jme), INTENT(IN) :: PEXPXY
+   INTEGER, OPTIONAL, INTENT(IN)  ::  ISICE
+   INTEGER , OPTIONAL,  INTENT(OUT) :: STEPWTD
+   REAL , OPTIONAL, INTENT(IN) :: WTDDT
 
 !URBAN
 !   REAL, DIMENSION(1:num_roof_layers), INTENT(INOUT) :: DZR  !Optional urban
@@ -2339,9 +2441,10 @@ integer myproc
              ENDIF
           ENDIF
 !
+
       CASE (NOAHMPSCHEME)
-          CALL NOAHMP_INIT(MMINLU, SNOW,SNOWH,CANWAT,ISLTYP,IVGTYP,                         &
-                     TSLB,SMOIS,SH2O,DZS, FNDSOILW, FNDSNOWH, config_flags%isice,           &
+          CALL NOAHMP_INIT(MMINLU, SNOW,SNOWH,CANWAT,ISLTYP,IVGTYP,ISURBAN,                 &
+                     TSLB,SMOIS,SH2O,DZS, FNDSOILW, FNDSNOWH, config_flags%isice, config_flags%iswater  ,         &
                      TSK,isnowxy  ,tvxy     ,tgxy     ,canicexy ,TMN,XICE,                  &
                      canliqxy ,eahxy    ,tahxy    ,cmxy     ,chxy     ,                     &
                      fwetxy   ,sneqvoxy ,alboldxy ,qsnowxy  ,wslakexy ,zwtxy    ,waxy     , &
@@ -2349,10 +2452,16 @@ integer myproc
                      stmassxy ,woodxy   ,stblcpxy ,fastcpxy ,xsaixy   ,                     &
                      t2mvxy   ,t2mbxy   ,chstarxy ,            &
                      num_soil_layers, restart,                 &
-                     allowed_to_read ,                         &
+                     allowed_to_read, iopt_run ,               &
                      ids,ide, jds,jde, kds,kde,                &
                      ims,ime, jms,jme, kms,kme,                &
-                     its,ite, jts,jte, kts,kte                 )
+                     its,ite, jts,jte, kts,kte                 &
+#if (EM_CORE == 1)
+                     ,smoiseq  ,smcwtdxy ,rechxy   ,deeprechxy, areaxy ,dx, dy, msftx, msfty,&
+                     wtddt    ,stepwtd  ,dt  ,qrfsxy ,qspringsxy  ,qslatxy,                  &
+                     fdepthxy ,ht       ,riverbedxy ,eqzwt ,rivercondxy ,pexpxy              &
+#endif
+                     )
 
       CASE (RUCLSMSCHEME)
 !          if(isfc .ne. 2)CALL wrf_error_fatal &
@@ -3023,6 +3132,7 @@ integer myproc
                          nssl_cnor, nssl_cnos,                   &
                          nssl_rho_qh, nssl_rho_qhl,              &
                          nssl_rho_qs,                            &
+                      z_at_q, qnwfa2d, scalar, num_sc,        &  ! G. Thompson
                       ids, ide, jds, jde, kds, kde,               &
                       ims, ime, jms, jme, kms, kme,               &
                       its, ite, jts, jte, kts, kte                )
@@ -3072,6 +3182,10 @@ integer myproc
                                   F_ICE_PHY,F_RAIN_PHY,F_RIMEF_PHY
    REAL , DIMENSION(:) ,INTENT(INOUT)  :: mp_restart_state,tbpvs_state,tbpvs0_state
    LOGICAL , INTENT(IN)  :: allowed_to_read
+   REAL, DIMENSION(ims:ime,jms:jme), INTENT(INOUT):: qnwfa2d                       !  G. Thompson
+   REAL, DIMENSION(ims:ime,kms:kme,jms:jme), INTENT(IN):: z_at_q                   !  G. Thompson
+   INTEGER, INTENT(IN) :: num_sc                                               !  G. Thompson
+   REAL, DIMENSION(ims:ime,kms:kme,jms:jme, num_sc), INTENT(INOUT):: scalar    !  G. Thompson
 
 ! Local
    INTEGER :: i, j, itf, jtf
@@ -3134,9 +3248,23 @@ integer myproc
                           its, ite, jts, jte, kts, kte            )
 #endif 
      CASE (THOMPSON)
+         IF(start_of_simulation.or.restart.or.config_flags%cycling)     &
+            CALL thompson_init(HGT=z_at_q,                              &
+                          IDS=ids, IDE=ide, JDS=jds, JDE=jde, KDS=kds, KDE=kde,   &
+                          IMS=ims, IME=ime, JMS=jms, JME=jme, KMS=kms, KME=kme,   &
+                          ITS=its, ITE=ite, JTS=jts, JTE=jte, KTS=kts, KTE=kte)
+
+     CASE (THOMPSONAERO)
 ! Cycling the WRF forecast with moving nests will cause this initialization to be
 ! called for each nest move. This is potentially very computationally expensive.
-         IF(start_of_simulation.or.restart.or.config_flags%cycling)CALL thompson_init
+         IF(start_of_simulation.or.restart.or.config_flags%cycling)     &
+            CALL thompson_init(HGT=z_at_q,                              &
+                          NWFA2D=qnwfa2d,                               &
+                          NWFA=scalar(ims,kms,jms,P_QNWFA),             &
+                          NIFA=scalar(ims,kms,jms,P_QNIFA),             &
+                          IDS=ids, IDE=ide, JDS=jds, JDE=jde, KDS=kds, KDE=kde,   &
+                          IMS=ims, IME=ime, JMS=jms, JME=jme, KMS=kms, KME=kme,   &
+                          ITS=its, ITE=ite, JTS=jts, JTE=jte, KTS=kts, KTE=kte)
 
      CASE (MORR_TWO_MOMENT)
          CALL morr_two_moment_init

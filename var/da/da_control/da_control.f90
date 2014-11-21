@@ -6,7 +6,7 @@ module da_control
 
    use module_driver_constants, only : max_domains, max_eta, max_moves, max_bogus, &
                                        max_outer_iterations, max_instruments, max_plevs, &
-                                       max_ocean
+                                       max_ocean, num_ob_indexes
 
    implicit none
 
@@ -457,7 +457,6 @@ module da_control
 
    integer, parameter            :: maxsensor = 30
 
-   integer, parameter :: num_ob_indexes = 29
    integer, parameter :: npres_print = 12
 
 

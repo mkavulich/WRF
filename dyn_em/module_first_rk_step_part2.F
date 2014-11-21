@@ -338,6 +338,8 @@ BENCH_START(cal_phy_tend)
                      grid%rqishten,grid%rqsshten,grid%rqgshten,        &
                      grid%RUNDGDTEN,grid%RVNDGDTEN,grid%RTHNDGDTEN,grid%RQVNDGDTEN, &
                      grid%RMUNDGDTEN,                                  &
+                     scalar, scalar_tend, num_scalar,                  &
+                     tracer, tracer_tend, num_tracer,                  &
                      ids,ide, jds,jde, kds,kde,                        &
                      ims,ime, jms,jme, kms,kme,                        &
                      grid%i_start(ij), min(grid%i_end(ij),ide-1),      &
@@ -511,6 +513,7 @@ BENCH_START(calc_tke_tim)
                                  grid%cf1, grid%cf2, grid%cf3, grid%warm_rain,          &
                                  grid%mix_upper_bound,                                  &
                                  grid%msftx, grid%msfty,                                &
+                                 grid%zx, grid%zy,                                      &
                                  ids,ide, jds,jde, kds,kde,                             &
                                  ims,ime, jms,jme, kms,kme,                             &
                                  grid%i_start(ij), grid%i_end(ij),                      &
@@ -785,7 +788,7 @@ BENCH_START(vert_diff_tim)
                                       grid%defor13,grid%defor23,grid%defor33,                   &
                                       nba_mij, num_nba_mij,          & !JDM
                                       grid%div, moist, chem, scalar,tracer,         &
-                                      grid%xkmv, grid%xkhv, config_flags%km_opt,                        &
+                                      grid%xkmv, grid%xkhv, grid%xkmh, config_flags%km_opt,       & ! xkmh added Oct2013
                                       grid%fnm, grid%fnp, grid%dn, grid%dnw, grid%rdz, grid%rdzw, &
                                       grid%hfx, grid%qfx, grid%ustm, grid%rho,   &
                                       ids, ide, jds, jde, kds, kde,              &

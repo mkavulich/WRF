@@ -51,6 +51,16 @@
      &                    ,RTHRATEN                                     &
      &                    ,re_cloud,re_ice,re_snow                      & ! G. Thompson
      &                    ,has_reqc,has_reqi,has_reqs                   & ! G. Thompson
+     &                    ,SWUPT,SWUPTC,SWDNT,SWDNTC                    &
+     &                    ,SWUPB,SWUPBC,SWDNB,SWDNBC                    &
+     &                    ,LWUPT,LWUPTC,LWDNT,LWDNTC                    &
+     &                    ,LWUPB,LWUPBC,LWDNB,LWDNBC                    &
+     &                    ,ACSWUPT,ACSWUPTC,ACSWDNT,ACSWDNTC            &
+     &                    ,ACSWUPB,ACSWUPBC,ACSWDNB,ACSWDNBC            &
+     &                    ,ACLWUPT,ACLWUPTC,ACLWDNT,ACLWDNTC            &
+     &                    ,ACLWUPB,ACLWUPBC,ACLWDNB,ACLWDNBC            &
+     &                    ,SWVISDIR ,SWVISDIF                           &  !ssib
+     &                    ,SWNIRDIR, SWNIRDIF &                            !ssib
 #ifdef WRF_CHEM
      &                    ,PM2_5_DRY, PM2_5_WATER, PM2_5_DRY_EC         &
      &                    ,TAUAER1, TAUAER2, TAUAER3, TAUAER4           &
@@ -152,6 +162,26 @@
 #endif
 !
       REAL,DIMENSION(IMS:IME,JMS:JME,KMS:KME),INTENT(INOUT) :: CLDFRA
+
+   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) ::          &
+                      ACSWUPT,ACSWUPTC,ACSWDNT,ACSWDNTC,          &
+                      ACSWUPB,ACSWUPBC,ACSWDNB,ACSWDNBC,          &
+                      ACLWUPT,ACLWUPTC,ACLWDNT,ACLWDNTC,          &
+                      ACLWUPB,ACLWUPBC,ACLWDNB,ACLWDNBC
+
+! TOA and surface, upward and downward, total and clear fluxes
+   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) ::          &
+                        SWUPT,  SWUPTC,  SWDNT,  SWDNTC,          &
+                        SWUPB,  SWUPBC,  SWDNB,  SWDNBC,          &
+                        LWUPT,  LWUPTC,  LWDNT,  LWDNTC,          &
+                        LWUPB,  LWUPBC,  LWDNB,  LWDNBC
+
+   REAL, DIMENSION( ims:ime, jms:jme ),                           &
+         INTENT(OUT  )  ::                              SWVISDIR, &
+                                                        SWVISDIF, &
+                                                        SWNIRDIR, &
+                                                        SWNIRDIF
+
 !
 !..Additions for coupling cloud physics effective radii and radiation.  G. Thompson
       REAL,DIMENSION(IMS:IME,JMS:JME,KMS:KME),INTENT(IN):: re_cloud, re_ice, re_snow
@@ -404,6 +434,40 @@
      &                 ,STEPRA=NRAD,ICLOUD=ICLOUD                       &
      &                 ,WARM_RAIN=WARM_RAIN                             &
      &                 ,SWDOWNC=TOTSWDNC,CLDFRA=CLFR                    &
+     &                 ,SWUPT=SWUPT                                     &
+     &                 ,SWUPTC=SWUPTC                                   &
+     &                 ,SWDNT=SWDNT                                     &
+     &                 ,SWDNTC=SWDNTC                                   &
+     &                 ,SWUPB=SWUPB                                     &
+     &                 ,SWUPBC=SWUPBC                                   &
+     &                 ,SWDNB=SWDNB                                     &
+     &                 ,SWDNBC=SWDNBC                                   &
+     &                 ,LWUPT=LWUPT                                     &
+     &                 ,LWUPTC=LWUPTC                                   &
+     &                 ,LWDNT=LWDNT                                     &
+     &                 ,LWDNTC=LWDNTC                                   &
+     &                 ,LWUPB=LWUPB                                     &
+     &                 ,LWUPBC=LWUPBC                                   &
+     &                 ,LWDNB=LWDNB                                     &
+     &                 ,LWDNBC=LWDNBC                                   &
+     &                 ,ACSWUPT=ACSWUPT                                 &
+     &                 ,ACSWUPTC=ACSWUPTC                               &
+     &                 ,ACSWDNT=ACSWDNT                                 &
+     &                 ,ACSWDNTC=ACSWDNTC                               &
+     &                 ,ACSWUPB=ACSWUPB                                 &
+     &                 ,ACSWUPBC=ACSWUPBC                               &
+     &                 ,ACSWDNB=ACSWDNB                                 &
+     &                 ,ACSWDNBC=ACSWDNBC                               &
+     &                 ,ACLWUPT=ACLWUPT                                 &
+     &                 ,ACLWUPTC=ACLWUPTC                               &
+     &                 ,ACLWDNT=ACLWDNT                                 &
+     &                 ,ACLWDNTC=ACLWDNTC                               &
+     &                 ,ACLWUPB=ACLWUPB                                 &
+     &                 ,ACLWUPBC=ACLWUPBC                               &
+     &                 ,ACLWDNB=ACLWDNB                                 &
+     &                 ,ACLWDNBC=ACLWDNBC                               &
+     &        ,SWVISDIR=swvisdir ,SWVISDIF=swvisdif                     &  !ssib
+     &        ,SWNIRDIR=swnirdir ,SWNIRDIF=swnirdif                     &  !ssib
      &                 ,re_cloud=grid%re_cloud                          & ! G. Thompson
      &                 ,re_ice=grid%re_ice                              & ! G. Thompson
      &                 ,re_snow=grid%re_snow                            & ! G. Thompson
@@ -1429,6 +1493,14 @@
      &        ,chleafxy=grid%chleafxy ,  chucxy=grid%chucxy                          &                       
      &        ,  chv2xy=grid%chv2xy   ,  chb2xy=grid%chb2xy , chstarxy=grid%chstarxy &                       
      &        ,coszen=grid%czen,xlat_urb2d=grid%xlat                                 &
+! lake module
+     &          ,lakedepth2d=grid%lakedepth2d, savedtke12d=grid%savedtke12d, snowdp2d=grid%snowdp2d, h2osno2d=grid%h2osno2d       & !lake
+     &          ,snl2d=grid%snl2d, t_grnd2d=grid%t_grnd2d, t_lake3d=grid%t_lake3d,   lake_icefrac3d=grid%lake_icefrac3d           & !lake
+     &          ,z_lake3d=grid%z_lake3d, dz_lake3d=grid%dz_lake3d, t_soisno3d=grid%t_soisno3d, h2osoi_ice3d=grid%h2osoi_ice3d     & !lake
+     &          ,h2osoi_liq3d=grid%h2osoi_liq3d, h2osoi_vol3d=grid%h2osoi_vol3d, z3d=grid%z3d, dz3d=grid%dz3d                     & !lake
+     &          ,zi3d=grid%zi3d, watsat3d=grid%watsat3d, csol3d=grid%csol3d, tkmg3d=grid%tkmg3d                                   & !lake
+     &          ,tkdry3d=grid%tkdry3d,tksatu3d=grid%tksatu3d, LakeModel=grid%LakeModel,  lakeminalt=grid%lakeminalt               & !lake
+! end lake module
      &        ,maxpatch=1,inest=1,history_interval=config_flags%history_interval  & !clm
 
      &                                                          )
@@ -1523,6 +1595,7 @@
      &               ,J_START=GRID%J_START,J_END=GRID%J_END           &
      &               ,KTS=KTS,KTE=KTE,NUM_TILES=GRID%NUM_TILES        &
      &               ,CTOPO=grid%ctopo,CTOPO2=grid%ctopo2             &
+     &               ,NUM_SCALAR=1, NUM_TRACER=1                      &  ! parameters not used by NMM
 #if (NMM_CORE==1)
      &               ,DISHEAT=DISHEAT                                 &
 #endif
@@ -2794,6 +2867,7 @@
      &                   ,GRID,CONFIG_FLAGS                             &
      &                   ,re_cloud,re_ice,re_snow                       & ! G. Thompson
      &                   ,has_reqc,has_reqi,has_reqs                    & ! G. Thompson
+     &                   ,diag_flag                                     & 
      &                   ,IDS,IDE,JDS,JDE,KDS,KDE                       &
      &                   ,IMS,IME,JMS,JME,KMS,KME                       &
      &                   ,ITS,ITE,JTS,JTE,KTS,KTE)
@@ -2890,6 +2964,7 @@
       REAL,DIMENSION(:,:,:,:),ALLOCATABLE :: MOIST_TRANS
       REAL,DIMENSION(:,:,:,:),ALLOCATABLE :: SCALAR_TRANS
 !
+      LOGICAL                        :: diag_flag
       LOGICAL :: E_BDY,F_QT,QT_PRESENT,WARM_RAIN
 !
 !-----------------------------------------------------------------------
@@ -3040,7 +3115,10 @@
      &                 ,I_START=GRID%I_START,I_END=GRID%I_END           &
      &                 ,J_START=GRID%J_START,J_END=GRID%J_END           &
      &                 ,KTS=KTS,KTE=KTE,NUM_TILES=GRID%NUM_TILES        &
+     &                 ,DO_RADAR_REF=config_flags%do_radar_ref          &
+     &                 ,DIAGFLAG=diag_flag                              &
      &                 ,ID=grid%id                                      &
+     &                 ,refl_10cm=grid%refl_10cm & ! to calc. radar reflectivity
      &                 ,re_cloud=grid%re_cloud                          & ! G. Thompson
      &                 ,re_ice=grid%re_ice                              & ! G. Thompson
      &                 ,re_snow=grid%re_snow                            & ! G. Thompson

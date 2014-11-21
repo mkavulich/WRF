@@ -2095,6 +2095,7 @@ CONTAINS
 
         
       END SUBROUTINE diff3d
+#if (EM_CORE==1)
 ! ===6=8===============================================================72
           SUBROUTINE diff4d(DT,DZ,SCALAR,IS_SCALAR,RHO              &
               ,EXCH_H,EXCH_M  &  
@@ -2122,7 +2123,9 @@ CONTAINS
 ! (at the lowest level the surface fluxes should go in these terms)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !-----------------------------------------------------------------------
-      USE module_state_description, ONLY: P_QNS, P_QNR, P_QNG, P_QT, P_QNH, P_QVOLG
+      USE module_state_description, ONLY: &
+                  P_QNS, P_QNR, P_QNG, P_QT, P_QNH, P_QVOLG, P_QKE_ADV
+
 
       IMPLICIT NONE
 !
@@ -2167,7 +2170,7 @@ CONTAINS
       DO im=PARAM_FIRST_SCALAR,NUM_SCALAR
 ! need to avoid mixing scalars associated with precipitating species (e.g. Nr)
         IF((IS_SCALAR .AND. im.NE.P_QNS .AND. im.NE.P_QNR .AND. im.NE.P_QNG &
-          .AND. im.NE.P_QNH .AND. im.NE.P_QT .AND. im.NE.P_QVOLG) &
+          .AND. im.NE.P_QNH .AND. im.NE.P_QT .AND. im.NE.P_QVOLG .AND. im.NE.P_QKE_ADV) &
           .OR. (.not. IS_SCALAR)) THEN
         do j=jts,jte
         do i=its,ite
@@ -2224,6 +2227,7 @@ CONTAINS
         
       END SUBROUTINE diff4d
 ! ===6=8===============================================================72
+#endif
 
        subroutine diff(kms,kme,kts,kte,dt,co,da,daz,cd,aa,bb,sf,vl,dz,fc)
 

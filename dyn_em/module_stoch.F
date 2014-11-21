@@ -14,28 +14,53 @@ module module_stoch
 ! Details of the scheme and its performance in a meso-scale WRF-ensemble 
 ! system are available in:
 !
-! Berner, J.,  S.-Y. Ha, J. P. Hacker, A. Fournier and C. Snyder 2010:
-! Model uncertainty in a mesoscale ensemble prediction system: Stochastic 
-! versus multi-physics representations,  MWR, accepted 
-! (available through the AMS early online release) 
+! Berner, J.,  S.-Y. Ha, J. P. Hacker, A. Fournier and C. Snyder 2011:
+! "Model uncertainty in a mesoscale ensemble prediction system: Stochastic 
+! versus multi-physics representations",  2011, Mon. Wea. Rev., 139, 1972—1995
+! http://journals.ametsoc.org/doi/abs/10.1175/2010MWR3595.1
 !
 ! Features: 
-! Version 1.0: 
 !     Dissipation: Dissipation rates are assumed constant in space and time
 !     Vertical structure: Supports two options for vertical structure: 
 !                         0) constant
 !                         1) random phase
 !
 ! Optional namelist parameters:
-!     stoch_opt           -   0) No stochastic parameterization
-!                         -   1) Stochastic kinetic-energy backscatter scheme (SKEB)
-!     stoch_vertstruc_opt -   0) Constant vertical structure 
-!                         -   1) Random phase vertical structure
-!     tot_backscat_psi    -   Strength of streamfunction perturbations
-!     tot_backscat-t      -   Strength of potential temperature perturbations
-!                       
-!***********************************************************************
+!   stoch_force_opt		=	0, 0, 0: No stochastic parameterization
+!   			=	1, 1, 1: Use SKEB scheme
+!   stoch_vertstruc_opt	=	0, 0, 0: Constant vertical structure of random pattern generator
+!   			= 	1, 1, 1: Random phase vertical structure random pattern generator
+!   tot_backscat_psi	:	Total backscattered dissipation rate for streamfunction; Controls 
+!                                   amplitude of rotational wind perturbations Default value is 1.0E-5 m2/s3.
+!   tot_backscat_t		:	Total backscattered dissipation rate for potential temperature; 
+!   				Controls amplitude of potential temperature perturbations. Default value is 1.0E-6 m2/s3.
+!   nens			:	Random seed for random number stream. This parameter needs to be different 
+!                                   for each member in ensemble forecasts. Is a function of initial start time 
+!   				to ensure different random number streams for different forecasts.
+!   ztau_psi		:	Decorrelation time (in s) for streamfunction perturbations.
+!   				Default is 10800s.  Recommended value is 216000s.
+!   ztau_t			:	Decorrelation time (in s) for potential temperature perturbations. 
+!   				Default 10800s. Recommended value is 216000s.
+!   rexponent_psi		:	Spectral slope for streamfunction perturbations. Default is -1.83 
+!                                   for a kinetic-energy forcing spectrum with slope -5/3.
+!   rexponent_t 		:	Spectral slope of potential temperature perturbations. Default is -1.83 
+!   				for a potential energy forcing spectrum with slope -1.832.
+!   kminforc		:	Minimal forcing wavenumber in longitude for streamfunction perturbations. Default is 1.
+!   lminforc		:	Minimal forcing wavenumber in latitude for streamfunction perturbations. Default is 1.
+!   kminforc		: 	Minimal forcing wavenumber in longitude for potential temperature perturbations. Default is 1.
+!   lminforct		:	Minimal forcing wavenumber in latitude for potential temperature perturbations. Default is 1.
+!   kmaxforc		:	Maximal forcing wavenumber in longitude for streamfunction perturbations. 
+!   				Default is maximal possible wavenumbers determined by number of gridpoints.
+!   lmaxforc		:	Maximal forcing wavenumber in latitude for streamfunction perturbations. 
+!   				Default is maximal possible wavenumbers determined by number of gridpoints.
+!   kmaxforct		:	Maximal forcing wavenumber in longitude for potential temperature perturbations. 
+!   				Default is maximal possible wavenumbers determined by number of gridpoints.
+!   lmaxforct		:	Maximal forcing wavenumber in latitude for potential temperature perturbations. 
+!   				Default is maximal possible wavenumbers determined by number of gridpoints.
+!   zsigma2_eps		:	Noise variance in autoregressive process defining streamfunction perturbations.
+!   zsigma2_eta		:	Noise variance in autoregressive process defining in potential temperature perturbations.
 
+!***********************************************************************
 !     ------------------------------------------------------------------
 !************** DECLARE FIELDS AND VARIABLES FOR STOCHASTIC BACKSCATTER
 !     ------------------------------------------------------------------
@@ -204,8 +229,10 @@ contains
       ! Fill lower left quadrant of ZCHI. For this range the indeces IK,IL 
        DO IK=jds-1,jde   ! These are now wavenumbers
        DO IL=ids-1,ide  
-       if (((sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).lt.((KMAXFORC+0.5)/RX)).and.(sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).ge.((KMINFORC-0.5)/RX))) .or. & 
-           ((sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).lt.((LMAXFORC+0.5)/RX)).and.(sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).ge.((LMINFORC-0.5)/RX))))then 
+       if (((sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).lt.((KMAXFORC+0.5)/RX)).and.&
+            (sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).ge.((KMINFORC-0.5)/RX))) .or. & 
+           ((sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).lt.((LMAXFORC+0.5)/RX)).and.&
+            (sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).ge.((LMINFORC-0.5)/RX))))then 
          if ((IK>0).or.(IL>0)) then 
            ZCHI(IL+1,IK+1)=((IK/RY*IK/RY)+(IL/RX*IL/RX))**(REXPONENT_PSI/2.)
            ZGAMMAN= ZGAMMAN + ((IK/RY*IK/RY)+(IL/RX*IL/RX))**(REXPONENT_PSI+1)
@@ -221,8 +248,10 @@ contains
       ! Fill lower left quadrant of ZCHI. For this range the indeces IK,IL 
        DO IK=jds-1,jde   ! These are now wavenumbers
        DO IL=ids-1,ide  
-       if (((sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).lt.((KMAXFORCT+0.5)/RX)).and.(sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).ge.((KMINFORCT-0.5)/RX))) .or. & 
-           ((sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).lt.((LMAXFORCT+0.5)/RX)).and.(sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).ge.((LMINFORCT-0.5)/RX))))then 
+       if (((sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).lt.((KMAXFORCT+0.5)/RX)).and.&
+            (sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).ge.((KMINFORCT-0.5)/RX))) .or. & 
+           ((sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).lt.((LMAXFORCT+0.5)/RX)).and.&
+            (sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).ge.((LMINFORCT-0.5)/RX))))then 
          if ((IK>0).or.(IL>0)) then 
            ZCHIT(IL+1,IK+1)=((IK/RY*IK/RY)+(IL/RX*IL/RX))**(REXPONENT_T/2.)
            ZGAMMAT= ZGAMMAT + ((IK/RY*IK/RY)+(IL/RX*IL/RX))**(REXPONENT_T)
@@ -461,8 +490,10 @@ contains
       ! Fill lower left quadrant of ZCHI. For this range the indeces IK,IL
       DO IK=jds-1,jde   ! These are now wavenumbers
       DO IL=ids-1,ide
-      if (((sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).lt.((KMAXFORCT+0.5)/RX)).and.(sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).ge.((KMINFORCT-0.5)/RX))) .or. &
-          ((sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).lt.((LMAXFORCT+0.5)/RX)).and.(sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).ge.((LMINFORCT-0.5)/RX))))then
+      if (((sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).lt.((KMAXFORCT+0.5)/RX)).and.&
+           (sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).ge.((KMINFORCT-0.5)/RX))) .or. &
+          ((sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).lt.((LMAXFORCT+0.5)/RX)).and.&
+           (sqrt((IK/RY*IK/RY)+(IL/RX*IL/RX)).ge.((LMINFORCT-0.5)/RX))))then
         if ((IK>0).or.(IL>0)) then
           ZCHIT(IL+1,IK+1)=exp(  -2*RPI**2*kappat*((IK/RY*IK/RY)+(IL/RX*IL/RX)) ) !SPPT
           ZGAMMAN= ZGAMMAN + exp(  -4*RPI**2*kappat*((IK/RY*IK/RY)+(IL/RX*IL/RX)) ) !SPPT

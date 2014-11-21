@@ -168,9 +168,15 @@ subroutine da_setup_obs_structures( grid, ob, iv, j_cost)
    end if
 
    if ( use_gpsrefobs ) then
-      if ( ob_format_gpsro == ob_format_bufr .and.  &
-           ob_format       == ob_format_ascii ) then
-         call da_message((/'ob_format=2 while ob_format_gpsro=1, will be reading GPSRO data from gpsro.bufr'/))
+      if ( ob_format == ob_format_bufr ) then
+          ! when main conv input is from bufr, gpsro has to be from bufr too
+          ! overwrite the namelist setting
+          ob_format_gpsro = ob_format_bufr
+      else 
+         if ( ob_format == ob_format_ascii .and. &
+              ob_format_gpsro == ob_format_bufr ) then
+            call da_message((/'ob_format=2 while ob_format_gpsro=1, will be reading GPSRO data from gpsro.bufr'/))
+         end if
       end if
    end if
 
@@ -212,17 +218,13 @@ subroutine da_setup_obs_structures( grid, ob, iv, j_cost)
       ! Conventional obs can be in BUFR or ascii format
       if (ob_format == ob_format_bufr) then
          call da_message((/'Using PREPBUFR format observation input'/))
-         thin_conv = .true.
-         write(unit=message(1), fmt='(a,a)') '!!! thin_conv is forced to be true for PREPBUFR data', &
-            ' to keep only one ob closest to the analysis time at a fix location by thinning !!!'
-         call da_message(message(1:1))
          call da_setup_obs_structures_bufr (grid, ob, iv)
       else if (ob_format == ob_format_ascii) then
          call da_message((/'Using ASCII format observation input'/))
          call da_setup_obs_structures_ascii (ob, iv, grid)
-      else if (ob_format == ob_format_madis) then
-         call da_message((/'Using MADIS format observation input'/))
-         call da_setup_obs_structures_madis (ob, iv) 
+      else
+         write(unit=message(1),fmt='(A,I3)') 'Invalid ob_format = ', ob_format
+         call da_error(__FILE__,__LINE__,message(1:1))
       end if
    end if
 
@@ -255,7 +257,7 @@ subroutine da_setup_obs_structures( grid, ob, iv, j_cost)
             ob_name = obs_names(j)
          endif
          if(iv%info(j)%ptotal(i) - iv%info(j)%ptotal(i-1) > 0) then          
-         if ( thin_conv .and. ob_format == ob_format_ascii ) then
+         if ( thin_conv_ascii .and. ob_format == ob_format_ascii ) then
             if ( j == radiance ) cycle !temporary fix to not print incorrect counts for radiance
             write(unit=stdout, fmt='(2x,2(a,i10),a,i8,a)') &
                ob_name, iv%info(j)%ptotal(i) - iv%info(j)%ptotal(i-1), ' global, ', &
@@ -265,7 +267,7 @@ subroutine da_setup_obs_structures( grid, ob, iv, j_cost)
             write(unit=stdout, fmt='(6x,a,i10,a,i8,a)') &
                ob_name, iv%info(j)%ptotal(i) - iv%info(j)%ptotal(i-1), ' global,', &
                iv%info(j)%plocal(i) - iv%info(j)%plocal(i-1), ' local'
-         end if ! thin_conv
+         end if ! thin_conv_ascii
          end if
       end do
    end do

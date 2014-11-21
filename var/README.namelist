@@ -32,35 +32,35 @@ Description of WRFDA namelist variables
                                     ;         diagnosed based on the increments of other fields.
                                     ;         If use_radarobs=.true., the w increments are always
                                     ;         calculated.
-var_wind                  = .false. ; .true.: wind values which are reported as speed/direction will be assimilated as such
+wind_sd                   = .false. ; .true.: wind values which are reported as speed/direction will be assimilated as such
                                     ; .false.: default behavior: all wind obs are converted to u/v prior to assimilation
 qc_rej_both               = .false  ; .true.: if either u or v (spd or dir) do not pass quality control, both obs are rejected
                                     ; .false.: default behavior: qc on wind obs is handled individually
 /
 &wrfvar3
   fg_format               = 1       ; 1: fg_format_wrf_arw_regional (default)
-                                    ; 2: fg_format_wrf_nmm_regional
-                                    ; 3: fg_format_wrf_arw_global
-                                    ; 4: fg_format_kma_global
-  ob_format               = 2       ; 1: ob_format_bufr (NCEP PREPBUFR), read in data from ob.bufr (not fully tested)
+                                    ; 3: fg_format_wrf_arw_global   (untested)
+                                    ; 4: fg_format_kma_global       (untested)
+  ob_format               = 2       ; 1: ob_format_bufr (NCEP PREPBUFR), read in data from ob.bufr
                                     ; 2: ob_format_ascii (output from obsproc), read in data from ob.ascii (default)
-                                    ; 3: ob_format_madis (not tested)
+  ob_format_gpsro         = 2       ; 1: read in GPSRO data from gpsro.bufr
+                                    ; 2: read in GPSRO data from ob.ascii (default)
   num_fgat_time           = 1       ; 1: 3DVAR
-                                    ; > 1: number of time slots for FGAT (for ob_format=2 and radiance only)
+                                    ; > 1: number of time slots for FGAT and 4DVAR
 /
 &wrfvar4
   thin_conv                         = .true.  ; for ob_format=1 (NCEP PREPBUFR) only.
                                               ; thinning is mandatory for ob_format=1 as time-duplicate 
                                               ; data are "thinned" within thinning routine, however, 
                                               ; thin_conv can be set to .false. for debugging purpose.
-  thin_mesh_conv (max_instruments)  = 20.0    ; for precipitation observation assimilation in 4D-Var and
-                                              ; ob_format=1 (NCEP PREPBUFR) only.
-                                              ; km, each observation type can set its thinning mesh and 
+  thin_conv_ascii                   = .false. ; .true.: thinning for ob_format=2 (ASCII) observations 
+  thin_mesh_conv (max_instruments)  = 20.0    ; km, size of thinning mesh boxes for conventional (non-radiation) 
+                                              ; observations. Each observation type can set its thinning mesh and 
                                               ; the index/order follows the definition in 
                                               ; WRFDA/var/da/da_control/da_control.f90
-     ; use_xxxobs - .true.: assimilate xxx obs if available
-     ;              .false.: not assimilate xxx obs even available
   thin_rainobs            = .true.  ; perform thinning on preciptation data 
+     ; use_xxxobs - .true.: assimilate xxx obs if available
+     ;              .false.: do not assimilate xxx obs even if available
   use_synopobs            = .true.   
   use_shipsobs            = .true.
   use_metarobs            = .true.
@@ -81,12 +81,9 @@ qc_rej_both               = .false  ; .true.: if either u or v (spd or dir) do n
   use_radar_rf            = .false.
   use_rainobs             = .false.
   use_airsretobs          = .true.
-     ; use_hirs2obs, use_hirs3obs, use_hirs4obs, use_mhsobs
-     ; use_msuobs, use_amsuaobs, use_amsubobs, use_airsobs,
-     ; use_eos_amsuaobs, use_hsbobs, use_ssmisobs are 
-     ; radiance-related variables that only control if reading
-     ; in corresponding BUFR files into WRFDA or not, but
-     ; do not control if assimilate the data or not.
+     ; the satellite radiance use_xxxobs variables below only control whether
+     ; WRFDA will read in the corresponding xxxx.bufr file; they do not control
+     ; if the data will be assimilated or not.
      ; Some more variables have to be set in &wrfvar14 in order
      ; to assimilate radiance data.
   use_hirs2obs            = .false.  ; .true.: to read in data from hirs2.bufr
@@ -97,9 +94,12 @@ qc_rej_both               = .false  ; .true.: if either u or v (spd or dir) do n
   use_amsuaobs            = .false.  ; .true.: to read in data from amsua.bufr
   use_amsubobs            = .false.  ; .true.: to read in data from amsub.bufr
   use_airsobs             = .false.  ; .true.: to read in data from airs.bufr
-  use_eos_amsuaobs        = .false.  ; .true.: to read in data from airs.bufr
+  use_eos_amsuaobs        = .false.  ; .true.: to read in EOS AMSUA data from airs.bufr
   use_hsbobs              = .false.  ; .true.: to read in data from hsb.bufr
   use_ssmisobs            = .false.  ; .true.: to read in data from ssmis.bufr
+  use_atmsobs             = .false.  ; .true.: to read in data from atms.bufr
+  use_iasisobs            = .false.  ; .true.: to read in data from iasi.bufr
+  use_sevirisobs          = .false.  ; .true.: to read in data from seviri.bufr
   use_obs_errfac          = .false.  ; .true.: apply obs error tuning factors if errfac.dat is available
                                      ; for conventional data only
 /
@@ -130,8 +130,9 @@ qc_rej_both               = .false  ; .true.: if either u or v (spd or dir) do n
 /
 &wrfvar6   ; for minimization options
   max_ext_its                  = 1         ; number of outer loops
-  ntmax (max_outer_iterations) = 200 ...   ; maximum number of iterations in an inner loop
-  eps (max_outer_iterations)   = 0.01 ...  ; minimization convergence criterion (used dimension: max_ext_its)
+  ntmax (max_outer_iterations) = 200       ; maximum number of iterations in inner loop 
+                                           ; (used dimension: max_ext_its)
+  eps (max_outer_iterations)   = 0.01      ; minimization convergence criterion (used dimension: max_ext_its)
                                            ; minimization stops when the norm of the gradient of the cost 
                                            ; function gradient is reduced by a factor of eps.
                                            ; inner minimization stops either when the criterion is met or 
@@ -147,7 +148,7 @@ qc_rej_both               = .false  ; .true.: if either u or v (spd or dir) do n
 &wrfvar7
   cv_options              = 5         ; 3: NCEP Background Error model
                                       ; 5: NCAR Background Error model (default)
-				      ; 6: Use of multivariate background error statistics
+				      ; 6: Multivariate background error statistics
   ; as1 - as5 are for cv_options=3 only
   as1 (3)                 = -1.0      ; tuning factors for variance, horizontal and vertical scales for 
                                       ; control variable 1 = stream function. For cv_options=3 only.
@@ -217,8 +218,8 @@ qc_rej_both               = .false  ; .true.: if either u or v (spd or dir) do n
                                       ;         program to continue are treated as fatal errors.
 /
 &wrfvar10   ; for code developers
-  test_transforms	  = .false.   ; .true.: perform adjoint tests
-  test_gradient	          = .false.   ;	.true.: perform gradient test
+  test_transforms	  = .false.   ; .true.: perform adjoint tests in 4DVAR
+  test_gradient	          = .false.   ;	.true.: perform gradient test in 4DVAR
 /
 &wrfvar11
   cv_options_hum          = 1       ; do not change
@@ -248,16 +249,16 @@ qc_rej_both               = .false  ; .true.: if either u or v (spd or dir) do n
   vert_corr               = 2      ; do not change
   vertical_ip             = 0      ; obsolete
   vert_evalue             = 1      ; do not change
-  max_vert_var1           = 99.0   ; speficy the maximum truncation value (in percentage)
+  max_vert_var1           = 99.0   ; specify the maximum truncation value (in percentage)
                                    ; to explain the variance of stream function
                                    ; in eigenvector decomposition
-  max_vert_var2           = 99.0   ; speficy the maximum truncation value (in percentage)
+  max_vert_var2           = 99.0   ; specify the maximum truncation value (in percentage)
                                    ; to explain the variance of unbalanced potential velocity
                                    ; in eigenvector decomposition
-  max_vert_var3           = 99.0   ; speficy the maximum truncation value (in percentage)
+  max_vert_var3           = 99.0   ; specify the maximum truncation value (in percentage)
                                    ; to explain the variance of unbalanced temperature
                                    ; in eigenvector decomposition
-  max_vert_var4           = 99.0   ; speficy the maximum truncation value (in percentage)
+  max_vert_var4           = 99.0   ; specify the maximum truncation value (in percentage)
                                    ; to explain the variance of pseudo relative humidity
                                    ; in eigenvector decomposition
   max_vert_var5           = 99.0   ; for unbalanced surface pressure, it should be a non-zero
@@ -265,9 +266,8 @@ qc_rej_both               = .false  ; .true.: if either u or v (spd or dir) do n
                                    ; set max_vert_var5=0.0 only for offline VarBC applications.
 /
 &wrfvar14
-     ; the following 4 variables (rtminit_nsensor, rtminit_platform,
-     ; rtminit_satid, rtminit_sensor) together control
-     ; what sensors to be assimilated.
+     ; the following 4 variables (rtminit_nsensor, rtminit_platform, rtminit_satid, rtminit_sensor) 
+     ; together control what sensors from which platforms will be assimilated.
   rtminit_nsensor                     = 1        ; total number of sensors to be assimilated
   rtminit_platform (max_instruments)  = -1       ; platforms IDs array (used dimension: rtminit_nsensor)
                                                  ; e.g., 1 for NOAA, 9 for EOS, 10 for METOP and 2 for DMSP
@@ -293,14 +293,13 @@ qc_rej_both               = .false  ; .true.: if either u or v (spd or dir) do n
                                                  ;         with empirical values or generated using variational
                                                  ;         tuning method (Desroziers and Ivanov, 2001)
   use_antcorr (max_instruments)       = .false.  ; .true.: perform Antenna Correction in CRTM
-  rtm_option                          = 1        ; what RTM (Radiative Transfer Model) to use
-                                                 ; 1: RTTOV (WRFDA needs to compile with RTTOV)
-                                                 ; 2: CRTM  (WRFDA needs to compile with CRTM)
+  rtm_option                          = 1        ; what RTM (Radiative Transfer Model) to use (see User's Guide)
+                                                 ;         1: RTTOV (WRFDA needs to compile with RTTOV)
+                                                 ;         2: CRTM  (WRFDA needs to compile with CRTM)
   only_sea_rad                        = .false.  ; .true.: assimilate radiance over water only
   use_varbc                           = .false.  ; .true.: perform Variational Bias Correction.
-                                                 ;         A parameter file in ASCII format called VARBC.in
-                                                 ;         (a template is provided with the source code tar ball)
-                                                 ;         is required.
+                                                 ;         An ASCII parameter file "VARBC.in" is required.
+                                                 ;         (a template is provided with the source code)
   freeze_varbc                        = .false.  ; .true: together with use_varbc=.false., keep the VarBC
                                                  ;        bias parameters constant in time. In this case,
                                                  ;        the bias correction is read and applied to the
@@ -316,7 +315,7 @@ qc_rej_both               = .false  ; .true.: if either u or v (spd or dir) do n
                                                  ;         AIRS Window channel #914 as criterion for GSI 
                                                  ;         thinning (with a higher amplitude than the distance 
                                                  ;         from the observation location to the nearest grid point).
-  use_crtm_kmatrix                    = .false.  ; .true. use CRTM K matrix rather than calling CRTM TL
+  use_crtm_kmatrix                    = .true.   ; .true. use CRTM K matrix rather than calling CRTM TL
                                                  ;        and AD routines for gradient calculation, which
                                                  ;        reduces runtime noticeably. 
   use_rttov_kmatrix                   = .false.  ; .true. use RTTOV K matrix rather than calling RTTOV TL
@@ -353,7 +352,7 @@ qc_rej_both               = .false  ; .true.: if either u or v (spd or dir) do n
 &wrfvar17
   analysis_type           = "3D-VAR"   ; "3D-VAR": 3D-VAR mode (default)
                                        ; "QC-OBS": 3D-VAR mode plus extra filtered_obs output
-                                       ; "VERIFY": verification mode. 
+                                       ; "VERIFY": verification mode.
                                        ;           WRF-Var resets check_max_iv=.false. and ntmax=0
                                        ; "RANDOMCV": for creating ensemble perturbations
   adj_sens	          = .false.    ; .true.: write out gradient of Jo for adjoint sensitivity
@@ -386,8 +385,7 @@ qc_rej_both               = .false  ; .true.: if either u or v (spd or dir) do n
   time_window_min         = "2002-08-02_21:00:00.0000"  ; start time of assimilation time window
                                                         ; used for ob_format=1 and radiances to select
                                                         ; observations inside the defined time_window.
-                                                        ; Note: new in V3.1, this variable is also used 
-                                                        ; for ob_format=2 to double-check if the obs
+                                                        ; Also used for ob_format=2 to check if the obs
                                                         ; are within the specified time window.
 /
 &wrfvar22

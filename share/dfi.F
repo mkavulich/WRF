@@ -185,7 +185,10 @@
       ! set diffusion to zero for backward integration
 
 #if (EM_CORE == 1)
-      CALL nl_set_km_opt( grid%id, grid%km_opt_dfi)
+      grid%km_opt_dfi = grid%km_opt
+      grid%diff_opt_dfi = grid%diff_opt
+      CALL nl_set_km_opt( grid%id, 1) 
+      CALL nl_set_diff_opt( grid%id, 0) 
       CALL nl_set_moist_adv_dfi_opt( grid%id, grid%moist_adv_dfi_opt)
       IF ( grid%moist_adv_opt == 2 ) THEN
          CALL nl_set_moist_adv_opt( grid%id, 0)
@@ -386,7 +389,10 @@
 
 #if (EM_CORE == 1)
       ! reset km_opt to normal
-      CALL nl_set_km_opt( grid%id, grid%km_opt)
+      grid%km_opt = grid%km_opt_dfi
+      grid%diff_opt = grid%diff_opt_dfi
+      CALL nl_set_km_opt( grid%id, grid%km_opt_dfi)
+      CALL nl_set_diff_opt( grid%id, grid%diff_opt_dfi)
       CALL nl_set_moist_adv_opt( grid%id, grid%moist_adv_opt)
 #endif
 
@@ -2838,7 +2844,10 @@ call wrf_message(mess)
 
 #if (EM_CORE == 1)
       ! set diffusion to zero for backward integration
+      grid%km_opt_dfi = grid%km_opt
+      grid%diff_opt_dfi = grid%diff_opt
       CALL nl_set_km_opt( grid%id, grid%km_opt_dfi)
+      CALL nl_set_diff_opt( grid%id, grid%diff_opt_dfi)
       CALL nl_set_moist_adv_dfi_opt( grid%id, grid%moist_adv_dfi_opt)
       IF ( grid%moist_adv_opt == 2 ) THEN
          CALL nl_set_moist_adv_opt( grid%id, 0)
@@ -3383,9 +3392,9 @@ call wrf_message(mess)
 
                   grid%ph_2(i,1,j) = grid%phb(i,1,j)
                   DO k = 2,kte
-                     pfu = grid%mu0(i,j)*grid%znw(k)   + grid%p_top
-                     pfd = grid%mu0(i,j)*grid%znw(k-1) + grid%p_top
-                     phm = grid%mu0(i,j)*grid%znu(k-1) + grid%p_top
+                     pfu = ( grid%mub(i,j)+grid%mu_2(i,j))*grid%znw(k)   + grid%p_top
+                     pfd = ( grid%mub(i,j)+grid%mu_2(i,j))*grid%znw(k-1) + grid%p_top
+                     phm = ( grid%mub(i,j)+grid%mu_2(i,j))*grid%znu(k-1) + grid%p_top
                      grid%ph_2(i,k,j) = grid%ph_2(i,k-1,j) + grid%alt(i,k-1,j)*phm*LOG(pfd/pfu)
                   END DO
 

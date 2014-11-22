@@ -75,7 +75,9 @@ contains
 #include "da_calculate_grady_radar.inc"
 #include "da_max_error_qc_radar.inc"
 #include "da_write_oa_radar_ascii.inc"
-#include "da_radar_all_rf.inc"
+#include "da_radar_rf.inc"
+#include "da_radar_ze.inc"
+#include "da_radar_ze_adj.inc"
 
 end module da_radar
 

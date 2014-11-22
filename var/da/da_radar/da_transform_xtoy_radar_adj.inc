@@ -116,7 +116,7 @@ subroutine da_transform_xtoy_radar_adj(grid, iv, jo_grad_y, jo_grad_x)
 
             if (use_radar_rze .and. .not. use_radar_rhv) then
                if (iv % radar(n) % rf(k) % qc >= obs_qc_pointer) then
-                  call da_radar_ze_b (model_qrnb2(k,n), qrn1,model_qsnb(k,n),qsn1,model_qgrb(k,n),qgr1,model_tc(k,n),model_rho(k,n),jo_grad_y%radar(n)%rf(k))
+                  call da_radar_ze_adj (model_qrnb2(k,n), qrn1,model_qsnb(k,n),qsn1,model_qgrb(k,n),qgr1,model_tc(k,n),model_rho(k,n),jo_grad_y%radar(n)%rf(k))
                   model_qrn(k,n) = model_qrn(k,n) + qrn1
                   model_qsn(k,n) = model_qsn(k,n) + qsn1
                   model_qgr(k,n) = model_qgr(k,n) + qgr1         
@@ -140,7 +140,6 @@ subroutine da_transform_xtoy_radar_adj(grid, iv, jo_grad_y, jo_grad_x)
                !TL  y%radar(n)%rqv(k) = y%radar(n)%rqv(k) +( es_beta*es_gamma/(model_tb(k,n)+es_gamma)**2.0 )*model_qvb(k,n)*model_t(k,n)
                   model_qv(k,n) = model_qv(k,n) + jo_grad_y%radar(n)%rqv(k)
                   model_t(k,n)  = model_t(k,n)  + (es_beta*es_gamma/(model_tb(k,n)+es_gamma)**2.0)*model_qvb(k,n)*jo_grad_y%radar(n)%rqv(k)
-               !print*,"xtoy_adj gradrqv=",n,k,  jo_grad_y%radar(n)%rqv(k) 
                end if
             end if
 
@@ -173,13 +172,6 @@ subroutine da_transform_xtoy_radar_adj(grid, iv, jo_grad_y, jo_grad_x)
    call da_interp_lin_3d_adj (jo_grad_x % qgr, iv%info(radar), model_qgr)
    call da_interp_lin_3d_adj (jo_grad_x % q,   iv%info(radar), model_qv)
    call da_interp_lin_3d_adj (jo_grad_x % t,   iv%info(radar), model_t)
-   !print*,"model_qv= ",sum(model_qv)
-   !print*,"model_t = ",sum(model_t)
-   !print*,"jo_grad_xq= ",sum(jo_grad_x % q)
-   !print*,"jo_grad_xt= ",sum(jo_grad_x % t)
-   !print*,"jo_grad_qr= ",sum(jo_grad_x % qrn)
-   !print*,"jo_grad_qs= ",sum(jo_grad_x % qsn)
-   !print*,"jo_grad_qg= ",sum(jo_grad_x % qgr)
 #ifdef A2C
    call da_interp_lin_3d_adj (jo_grad_x % v,   iv%info(radar), model_v,'u')
    call da_interp_lin_3d_adj (jo_grad_x % u,   iv%info(radar), model_u,'v')

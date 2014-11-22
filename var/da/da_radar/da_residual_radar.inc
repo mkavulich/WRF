@@ -50,9 +50,6 @@ subroutine da_residual_radar(iv, y, re, np_missing, np_bad_data, np_obs_used, np
         if (use_radar_rqv) then
            re%radar(n)%rqv(k) = da_residual(n, k, y%radar(n)%rqv(k), iv%radar(n)%rqv(k), n_obs_bad % rqv)
         end if
-        !if (iv%radar(n)%rqv(k)%qc.ge.0)then
-           !print*,"re%radar=y ",n,k, re%radar(n)%rqv(k)
-        !end if
       end do
    end do
 

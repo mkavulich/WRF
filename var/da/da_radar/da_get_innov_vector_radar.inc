@@ -236,9 +236,8 @@ END IF
             if ( (use_radar_rf  .and. use_radar_rhv) .or. &
                  (use_radar_rze .and. use_radar_rhv) .or. &
                  (use_radar_rf  .and. use_radar_rze) ) then
-               print*,"please choose only ONE: use_radar_rf or use_radar_rze or use_radar_rhv"
-               print*,"stop radar_get_inv "
-               stop
+               call da_error(__FILE__,__LINE__,&
+                    (/"Only one of these may be set to .true.: 'use_radar_rf', 'use_radar_rhv', 'use_radar_rze'"/))
             end if 
 
             if (use_radar_rf .and. .not.use_radar_rhv) then
@@ -293,14 +292,12 @@ END IF
                            ! maximum value check, use the data under threshold 15g/kg
                            ! call dz_radar_rf (ra,rs,rg,tc1,ro1,rze, dbz)
                            call da_radar_rf (model_qrn(k,n),model_qsn(k,n),model_qgr(k,n),model_tc(k,n),model_rho(k,n),rze1,dbz1)
-                           !print*,"dbz= ",ob % radar(n) % rf(k),dbz1
                            if (iv % radar(n) % rrno(k) .ge. 0.015.or.ob % radar(n) % rf(k).ge.55) then
                               print*,'rr_obs= ',iv % radar(n) % rrno(k),ob % radar(n) % rf(k),model_rho(k,n)
                               iv % radar(n) % rrn(k) % qc = -5  ! old -5 
                            else
                               iv % radar(n) % rrn(k) % qc = 0
                            end if
-                           !print*,"tc,qr= ",model_tc(k,n),iv % radar(n) % rrno(k),ob % radar(n) % rf(k)
                         else if (model_tc(k,n).lt.5.0 .and. model_tc(k,n).ge.-5.0 ) then
                              czr=(model_tc(k,n)+5)/10.0
                              if (model_tc(k,n).le.0.0) then
@@ -320,7 +317,6 @@ END IF
                              iv % radar(n) % rrn(k) % qc = 0
                              iv % radar(n) % rsn(k) % qc = 0
                              iv % radar(n) % rgr(k) % qc = 0
-                             !print*,"tc,qr,qs,qg= ",model_tc(k,n),iv % radar(n) % rrno(k),iv % radar(n) % rsno(k),iv % radar(n) % rgro(k),ob % radar(n) % rf(k)
                         else if (model_tc(k,n).le.-5.0) then
                              czs = zds/(zds+zg)
                              czg = 1.0 - czs
@@ -332,9 +328,7 @@ END IF
                              iv % radar(n) % rgro(k) = exp ( log(rze1/zg )/1.75 )/model_rho(k,n)
                              iv % radar(n) % rsn(k) % qc = 0
                              iv % radar(n) % rgr(k) % qc = 0
-                             !print*,"tc,qs,qg= ",model_tc(k,n),iv % radar(n) % rsno(k),iv % radar(n) % rgro(k),ob % radar(n) % rf(k)
                         end if  ! temp
-                        !print*,"model tc= ",k,n,model_tc(k,n),iv % radar(n) % rrno(k),iv % radar(n) % rsno(k),iv % radar(n) % rgro(k)
                      end if  ! it=1
                    iv % radar(n) % rsn(k) % qc = -5  ! wenxue
 				   iv % radar(n) % rgr(k) % qc = -5 ! wenxue
@@ -342,16 +336,13 @@ END IF
                         ! x=b**y; y=logb(x)
                         iv % radar(n) % rrn(k) % inv = iv % radar(n) % rrno(k) - model_qrn(k,n)
                         iv % radar(n) % rrn(k) % error = iv % radar(n) % rf(k) % error * iv % radar(n) % rrno(k) * alog_10/leh2
-                        ! print*,'radar_inv= ',ob % radar(n) % rf(k),iv % radar(n) % rf(k) % error,iv % radar(n) % rrno(k),iv % radar(n) % rrn(k) % error
                         ! rainwater error
                         iv % radar(n) % rrn(k) % error = amax1(0.0005,iv % radar(n) % rrn(k) % error)
                         iv % radar(n) % rrn(k) % error = amin1( 0.001,iv % radar(n) % rrn(k) % error)
-                        ! print*,n,k,ob % radar(n) % rf(k),10.0** ( (ob % radar(n) % rf(k)-leh1)/leh2 ) /model_rho(k,n),1000*model_qrn(k,n)
                      end if
                      if (iv % radar(n) % rsn(k) % qc >= obs_qc_pointer) then
                         iv % radar(n) % rsn(k) % inv = iv % radar(n) % rsno(k) - model_qsn(k,n)
                         iv % radar(n) % rsn(k) % error = iv % radar(n) % rf(k) % error * iv % radar(n) % rsno(k) * alog_10/leh2
-                        ! print*,'radar_inv= ',ob % radar(n) % rf(k),iv % radar(n) % rf(k) % error,iv % radar(n) % rrno(k),iv % radar(n) % rrn(k) % error
                         ! rainwater error
                         iv % radar(n) % rsn(k) % error = amax1(0.0005,iv % radar(n) % rrn(k) % error)
                         iv % radar(n) % rsn(k) % error = amin1( 0.001,iv % radar(n) % rrn(k) % error)
@@ -359,7 +350,6 @@ END IF
                      if (iv % radar(n) % rgr(k) % qc >= obs_qc_pointer) then
                         iv % radar(n) % rgr(k) % inv = iv % radar(n) % rgro(k) - model_qgr(k,n)
                         iv % radar(n) % rgr(k) % error = iv % radar(n) % rf(k) % error * iv % radar(n) % rgro(k) * alog_10/leh2
-                        ! print*,'radar_inv= ',ob % radar(n) % rf(k),iv % radar(n) % rf(k) % error,iv % radar(n) % rrno(k),iv % radar(n) % rrn(k) % error
                         ! rainwater error
                         iv % radar(n) % rgr(k) % error = amax1(0.0005,iv % radar(n) % rgr(k) % error)
                         iv % radar(n) % rgr(k) % error = amin1( 0.001,iv % radar(n) % rgr(k) % error)

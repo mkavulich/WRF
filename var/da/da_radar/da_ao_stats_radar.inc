@@ -128,7 +128,6 @@ subroutine da_ao_stats_radar (stats_unit, iv, re)
           stats%minimum%rqv%n, stats%maximum%rqv%n, &
           stats%minimum%rqv%l, stats%maximum%rqv%l)
    end if
-   ! print*,"in ao_radar= ",nrqv
    iv%nstats(radar) = nrv + nrf + nrrn + nrsn + nrgr + nrqv
 
    if (rootproc) then

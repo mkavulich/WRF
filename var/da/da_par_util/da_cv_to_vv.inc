@@ -69,68 +69,68 @@ subroutine da_cv_to_vv (cv_size, rcv, mzs, vv)
    ! Fill v4
    mz = mzs(4)
    if (mz > 0) then
-     ijm = ix * jy * mz
-     cv_s = cv_e + 1
-     cv_e = cv_s + ijm - 1
-     vv % v4(is:ie,js:je,1:mz) = RESHAPE(rcv(cv_s:cv_e),(/ix, jy, mz/))
+      ijm = ix * jy * mz
+      cv_s = cv_e + 1
+      cv_e = cv_s + ijm - 1
+      vv % v4(is:ie,js:je,1:mz) = RESHAPE(rcv(cv_s:cv_e),(/ix, jy, mz/))
    end if
 
    ! Fill v5
    mz = mzs(5)
    if (mz == 1) then ! Can only be 0 or 1 (2D ps_u field)
-     ijm = ix * jy * mz
-     cv_s = cv_e + 1
-     cv_e = cv_s + ijm - 1
-     vv % v5(is:ie,js:je,1:mz) = RESHAPE(rcv(cv_s:cv_e),(/ix, jy,mz/))
+      ijm = ix * jy * mz
+      cv_s = cv_e + 1
+      cv_e = cv_s + ijm - 1
+      vv % v5(is:ie,js:je,1:mz) = RESHAPE(rcv(cv_s:cv_e),(/ix, jy,mz/))
    end if
 #ifdef CLOUD_CV
    ! Fill v6
    mz = mzs(6)
    if (mz > 0) then
-     ijm = ix * jy * mz
-     cv_s = cv_e + 1
-     cv_e = cv_s + ijm - 1
-     vv % v6(is:ie,js:je,1:mz) = RESHAPE(rcv(cv_s:cv_e),(/ix, jy, mz/))
+      ijm = ix * jy * mz
+      cv_s = cv_e + 1
+      cv_e = cv_s + ijm - 1
+      vv % v6(is:ie,js:je,1:mz) = RESHAPE(rcv(cv_s:cv_e),(/ix, jy, mz/))
    end if
    ! Fill v7
    mz = mzs(7)
    if (mz > 0) then
-     ijm = ix * jy * mz
-     cv_s = cv_e + 1
-     cv_e = cv_s + ijm - 1
-     vv % v7(is:ie,js:je,1:mz) = RESHAPE(rcv(cv_s:cv_e),(/ix, jy, mz/))
+      ijm = ix * jy * mz
+      cv_s = cv_e + 1
+      cv_e = cv_s + ijm - 1
+      vv % v7(is:ie,js:je,1:mz) = RESHAPE(rcv(cv_s:cv_e),(/ix, jy, mz/))
    end if
    ! Fill v8
    mz = mzs(8)
    if (mz > 0) then
-     ijm = ix * jy * mz
-     cv_s = cv_e + 1
-     cv_e = cv_s + ijm - 1
-     vv % v8(is:ie,js:je,1:mz) = RESHAPE(rcv(cv_s:cv_e),(/ix, jy, mz/))
+      ijm = ix * jy * mz
+      cv_s = cv_e + 1
+      cv_e = cv_s + ijm - 1
+      vv % v8(is:ie,js:je,1:mz) = RESHAPE(rcv(cv_s:cv_e),(/ix, jy, mz/))
    end if
    ! Fill v9
    mz = mzs(9)
    if (mz > 0) then
-     ijm = ix * jy * mz
-     cv_s = cv_e + 1
-     cv_e = cv_s + ijm - 1
-     vv % v9(is:ie,js:je,1:mz) = RESHAPE(rcv(cv_s:cv_e),(/ix, jy, mz/))
+      ijm = ix * jy * mz
+      cv_s = cv_e + 1
+      cv_e = cv_s + ijm - 1
+      vv % v9(is:ie,js:je,1:mz) = RESHAPE(rcv(cv_s:cv_e),(/ix, jy, mz/))
    end if
    ! Fill v10
    mz = mzs(10)
    if (mz > 0) then
-     ijm = ix * jy * mz
-     cv_s = cv_e + 1
-     cv_e = cv_s + ijm - 1
-     vv % v10(is:ie,js:je,1:mz) = RESHAPE(rcv(cv_s:cv_e),(/ix, jy, mz/))
+      ijm = ix * jy * mz
+      cv_s = cv_e + 1
+      cv_e = cv_s + ijm - 1
+      vv % v10(is:ie,js:je,1:mz) = RESHAPE(rcv(cv_s:cv_e),(/ix, jy, mz/))
    end if
    ! Fill v11
    mz = mzs(11)
    if (mz > 0) then
-     ijm = ix * jy * mz
-     cv_s = cv_e + 1
-     cv_e = cv_s + ijm - 1
-     vv % v11(is:ie,js:je,1:mz) = RESHAPE(rcv(cv_s:cv_e),(/ix, jy, mz/))
+      ijm = ix * jy * mz
+      cv_s = cv_e + 1
+      cv_e = cv_s + ijm - 1
+      vv % v11(is:ie,js:je,1:mz) = RESHAPE(rcv(cv_s:cv_e),(/ix, jy, mz/))
    end if
 #endif
    !--------------------------------------------------------------------------

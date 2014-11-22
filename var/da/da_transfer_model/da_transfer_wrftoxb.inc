@@ -902,7 +902,7 @@ subroutine da_transfer_wrftoxb(xbx, grid, config_flags)
       end do
    end if
    
-if (use_radar_rze) then   !wenxue
+if (use_radar_rze) then
    do k = kts, kte
       do j = jts, jte
 	  do i = its, ite
@@ -912,7 +912,7 @@ if (use_radar_rze) then   !wenxue
 	  end do
 	  end do
    end do
-end if 	  !wenxue
+end if
    deallocate (xbx % latc_mean)
 
    if (trace_use) call da_trace_exit("da_transfer_wrftoxb")

@@ -184,7 +184,6 @@ subroutine da_transform_vtovv_adj(grid, cv_size, be, cv, vv)
       elseif(cloud_cv_options == 2)then
          call da_transform_through_rf_adj(grid, mz, be % v10 % rf_alpha, be % v10 % val, vv % v10)
       elseif(cloud_cv_options == 3)then
-         !print*,be % v10 % rf_alpha, be % v10 % val,scaling,mz
          call da_transform_through_rf_adj(grid, mz, be % v10 % rf_alpha, be % v10 % val, vv % v10, scaling)
       endif
    elseif( .not. use_rf ) then

@@ -125,7 +125,7 @@ subroutine da_transform_xtoy_radar (grid, iv, y)
 
             if (use_radar_rze .and. .not. use_radar_rhv) then
                if (iv % radar(n) % rf(k) % qc >= obs_qc_pointer) then
-               call da_radar_ze_d (model_qrnb2(k,n), model_qrn(k,n),model_qsnb(k,n),model_qsn(k,n),model_qgrb(k,n),model_qgr(k,n),model_tc(k,n),model_rho(k,n),rze1) 
+               call da_radar_ze (model_qrnb2(k,n), model_qrn(k,n),model_qsnb(k,n),model_qsn(k,n),model_qgrb(k,n),model_qgr(k,n),model_tc(k,n),model_rho(k,n),rze1) 
                y%radar(n)%rf(k) = rze1
                end if
             end if 
@@ -152,7 +152,6 @@ subroutine da_transform_xtoy_radar (grid, iv, y)
                   y%radar(n)%rqv(k) = model_qv(k,n)
                   ! Wang JAMC
                   y%radar(n)%rqv(k) = y%radar(n)%rqv(k) + ( es_beta*es_gamma/(model_tb(k,n)+es_gamma)**2.0 )*model_qvb(k,n)*model_t(k,n)
-                  !print*,'xtoy_radar= ',n,k, y%radar(n)%rqv(k),( es_beta*es_gamma/(model_tb(k,n)+es_gamma)**2.0 )*model_qvb(k,n)
                end if
             end if
 

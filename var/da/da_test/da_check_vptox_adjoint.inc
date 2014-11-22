@@ -177,22 +177,20 @@ subroutine da_check_vptox_adjoint(grid, ne, be, ep, vp, cv_size)
          typical_rh_rms**2 + adj_par_lhs
    end if
 
-!
+
 #ifdef CLOUD_CV
-   !if (use_radar_rf .or. use_radar_rze .or. use_radar_rhv .or.  crtm_cloud) then
-      if ( cloud_cv_options /= 1 ) then
-         adj_par_lhs = sum(grid%xa % qcw(its:ite,jts:jte,kts:kte)**2) / &
-            typical_qcw_rms**2 + adj_par_lhs
-         adj_par_lhs = sum(grid%xa % qrn(its:ite,jts:jte,kts:kte)**2) / &
-            typical_qrn_rms**2 + adj_par_lhs
-         adj_par_lhs = sum(grid%xa % qci (its:ite,jts:jte,kts:kte)**2) / &
-            typical_qci_rms**2 + adj_par_lhs
-         adj_par_lhs = sum(grid%xa % qsn(its:ite,jts:jte,kts:kte)**2) / &
-            typical_qsn_rms**2 + adj_par_lhs
-         adj_par_lhs = sum(grid%xa % qgr (its:ite,jts:jte,kts:kte)**2) / &
-            typical_qgr_rms**2 + adj_par_lhs
-      end if
-   !end if
+   if ( cloud_cv_options /= 1 ) then
+      adj_par_lhs = sum(grid%xa % qcw(its:ite,jts:jte,kts:kte)**2) / &
+           typical_qcw_rms**2 + adj_par_lhs
+      adj_par_lhs = sum(grid%xa % qrn(its:ite,jts:jte,kts:kte)**2) / &
+           typical_qrn_rms**2 + adj_par_lhs
+      adj_par_lhs = sum(grid%xa % qci (its:ite,jts:jte,kts:kte)**2) / &
+           typical_qci_rms**2 + adj_par_lhs
+      adj_par_lhs = sum(grid%xa % qsn(its:ite,jts:jte,kts:kte)**2) / &
+           typical_qsn_rms**2 + adj_par_lhs
+      adj_par_lhs = sum(grid%xa % qgr (its:ite,jts:jte,kts:kte)**2) / &
+           typical_qgr_rms**2 + adj_par_lhs
+   end if
 #else
    if (use_radar_rf .or. crtm_cloud) then
       if ( cloud_cv_options == 1 ) then
@@ -232,25 +230,20 @@ subroutine da_check_vptox_adjoint(grid, ne, be, ep, vp, cv_size)
       grid%xa % rh(:,:,:) = grid%xa % rh(:,:,:) / typical_rh_rms**2
    end if
 
-!
+
 #ifdef CLOUD_CV
-!   if (use_radar_rf .or. crtm_cloud) then
-      if ( cloud_cv_options /= 1 ) then
-         grid%xa % qcw(:,:,:) = grid%xa % qcw(:,:,:) / typical_qcw_rms**2
-         grid%xa % qrn(:,:,:) = grid%xa % qrn(:,:,:) / typical_qrn_rms**2
-         grid%xa % qci(:,:,:) = grid%xa % qci(:,:,:) / typical_qci_rms**2
-         grid%xa % qsn(:,:,:) = grid%xa % qsn(:,:,:) / typical_qsn_rms**2
-         grid%xa % qgr(:,:,:) = grid%xa % qgr(:,:,:) / typical_qgr_rms**2
-      end if
-!   end if
+   if ( cloud_cv_options /= 1 ) then
+      grid%xa % qcw(:,:,:) = grid%xa % qcw(:,:,:) / typical_qcw_rms**2
+      grid%xa % qrn(:,:,:) = grid%xa % qrn(:,:,:) / typical_qrn_rms**2
+      grid%xa % qci(:,:,:) = grid%xa % qci(:,:,:) / typical_qci_rms**2
+      grid%xa % qsn(:,:,:) = grid%xa % qsn(:,:,:) / typical_qsn_rms**2
+      grid%xa % qgr(:,:,:) = grid%xa % qgr(:,:,:) / typical_qgr_rms**2
+   end if
 #else
    if (use_radar_rf .or. crtm_cloud) then
       if ( cloud_cv_options == 1 ) then
          grid%xa % qcw(:,:,:) = grid%xa % qcw(:,:,:) / typical_qcw_rms**2
          grid%xa % qrn(:,:,:) = grid%xa % qrn(:,:,:) / typical_qrn_rms**2
-!         grid%xa % qci(:,:,:) = grid%xa % qci(:,:,:) / typical_qci_rms**2
-!         grid%xa % qsn(:,:,:) = grid%xa % qsn(:,:,:) / typical_qsn_rms**2
-!         grid%xa % qgr(:,:,:) = grid%xa % qgr(:,:,:) / typical_qgr_rms**2
       end if
    end if
 #endif
@@ -301,10 +294,6 @@ subroutine da_check_vptox_adjoint(grid, ne, be, ep, vp, cv_size)
    adj_par_rhs = sum(vp % v11(its:ite,jts:jte,:)* vp2_v11(its:ite,jts:jte,:)) + &
       adj_par_rhs
 #endif
-!  if (be % ne > 0) then
-!     adj_par_rhs = sum(vp % alpha(its:ite,jts:jte,kts:kte,:) * &
-!        vp2_alpha(its:ite,jts:jte,kts:kte,:)) + adj_par_rhs
-!  end if
    if (be % ne > 0) then
       adj_par_rhs = sum(vp % alpha(its_int:ite_int,jts_int:jte_int,kts_int:kte_int,:) * &
          vp2_alpha(its_int:ite_int,jts_int:jte_int,kts_int:kte_int,:)) + adj_par_rhs

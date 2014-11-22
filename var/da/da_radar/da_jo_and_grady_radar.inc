@@ -42,9 +42,6 @@ subroutine da_jo_and_grady_radar(iv, re, jo, jo_grad_y)
 
          if (use_radar_rqv) then
             jo_grad_y%radar(n)%rqv(k) = -re%radar(n)%rqv(k) / (iv%radar(n)%rqv(k)%error * iv%radar(n)%rqv(k)%error) 
-            !if (iv%radar(n)%rqv(k)%qc.ge.0)then
-            !   print*,"jo_grad_radar = ",n,k, jo_grad_y%radar(n)%rqv(k)
-            !end if
          end if
       end do
 
@@ -56,7 +53,6 @@ subroutine da_jo_and_grady_radar(iv, re, jo, jo_grad_y)
 
             if (use_radar_rf .or. use_radar_rze) then
                jo % radar_rf = jo % radar_rf - re%radar(n)%rf(k) * jo_grad_y%radar(n)%rf(k)
-               !print*,"jo_rze= ",jo % radar_rf, re%radar(n)%rf(k),jo_grad_y%radar(n)%rf(k) 
             end if
        
             if (.not. use_radar_rf .and. use_radar_rhv) then
@@ -78,7 +74,7 @@ subroutine da_jo_and_grady_radar(iv, re, jo, jo_grad_y)
    jo % radar_rsn= 0.5 * jo % radar_rsn
    jo % radar_rgr= 0.5 * jo % radar_rgr
    jo % radar_rqv= 0.5 * jo % radar_rqv
-   !print*,"in jo_and_grady_radar j= ", jo % radar_rv, jo % radar_rf, jo % radar_rrn, jo % radar_rsn,jo % radar_rgr,jo % radar_rqv
+
    if (trace_use) call da_trace_exit("da_jo_and_grady_radar")
 
 end subroutine da_jo_and_grady_radar

@@ -75,10 +75,10 @@ subroutine da_vv_to_cv(vv, xp, mzs, cv_size, rcv)
                ijk = ijk + 1
                rcv(ijk) = vv%v2(i,j,k)
             end do
-        end do
-     end do
+         end do
+      end do
 #else
-     rcv(cv_s:cv_e) = RESHAPE(vv % v2(is:ie,js:je,1:mz), (/ijm/))
+      rcv(cv_s:cv_e) = RESHAPE(vv % v2(is:ie,js:je,1:mz), (/ijm/))
 #endif
    end if
    ! Store v3

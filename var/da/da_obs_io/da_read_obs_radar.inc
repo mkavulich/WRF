@@ -212,7 +212,7 @@ subroutine da_read_obs_radar (iv, filename, grid)
          read (platform%info%date_char,'(i4,4(1x,i2))') &
                iyear, imonth, iday, ihour, imin
          call da_get_julian_time (iyear,imonth,iday,ihour,imin,obs_time)
-         ! whl if skip this part, has to skip in da_scan_obs_radar.inc too!
+         ! If you skip this part, you have to skip in da_scan_obs_radar.inc too!
          if ( obs_time < time_slots(0) .or. &
               obs_time >= time_slots(num_fgat_time) ) then
             if (print_detail_radar) then

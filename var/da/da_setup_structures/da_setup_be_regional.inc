@@ -219,7 +219,9 @@ subroutine da_setup_be_regional(xb, be, grid)
 
 #ifdef CLOUD_CV
   if ( interpolate_stats ) then
-     print*,"!!!! interpolate_stats may not work with CV5 with CLOUD_CV options"
+     write(unit=message(1),fmt='(A)') &
+          '!!  Option "interpolate_stats" may not work for CV5 with CLOUD_CV options  !!'
+     call da_warning(__FILE__,__LINE__,message(1:1))
   end if
   if(cloud_cv_options.eq.2)then
    read (be_unit)num_bins, num_bins2d
@@ -960,18 +962,20 @@ subroutine da_setup_be_regional(xb, be, grid)
       enddo
 #ifdef CLOUD_CV
       if (print_detail_be) then
-         print*,'length scale'
-         print*,'be1= ',be1_rf_lengthscale
-         print*,'be2= ',be2_rf_lengthscale
-         print*,'be3= ',be3_rf_lengthscale
-         print*,'be4= ',be4_rf_lengthscale
-         print*,'be5= ',be5_rf_lengthscale
-         print*,'be6= ',be6_rf_lengthscale
-         print*,'be7= ',be7_rf_lengthscale
-         print*,'be8= ',be8_rf_lengthscale
-         print*,'be9= ',be9_rf_lengthscale
-      print*,'be10= ',be10_rf_lengthscale
-      print*,'be11= ',be11_rf_lengthscale
+! Lengthscale variables (except 5!) are arrays of length "kz", so need to account for this in fmt statement
+         write(write_fmt,'(A,I0,A)')'(A,',kz,'(R10.5)'
+         write(unit=message(1),fmt='(A)') 'BE Length scales:'
+         write(unit=message(2),fmt=write_fmt) 'be1= ',be1_rf_lengthscale
+         write(unit=message(3),fmt=write_fmt) 'be2= ',be2_rf_lengthscale
+         write(unit=message(4),fmt=write_fmt) 'be3= ',be3_rf_lengthscale
+         write(unit=message(5),fmt=write_fmt) 'be4= ',be4_rf_lengthscale
+         write(unit=message(6),fmt='(A,R10.5)') 'be5= ',be5_rf_lengthscale
+         write(unit=message(7),fmt=write_fmt) 'be6= ',be6_rf_lengthscale
+         write(unit=message(8),fmt=write_fmt) 'be7= ',be7_rf_lengthscale
+         write(unit=message(9),fmt=write_fmt) 'be8= ',be8_rf_lengthscale
+         write(unit=message(10),fmt=write_fmt) 'be9= ',be9_rf_lengthscale
+         write(unit=message(11),fmt=write_fmt) 'be10= ',be10_rf_lengthscale
+         write(unit=message(12),fmt=write_fmt) 'be11= ',be11_rf_lengthscale
       end if
 #endif
 

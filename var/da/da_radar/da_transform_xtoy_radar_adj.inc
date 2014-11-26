@@ -116,7 +116,7 @@ subroutine da_transform_xtoy_radar_adj(grid, iv, jo_grad_y, jo_grad_x)
 
             if (use_radar_rze .and. .not. use_radar_rhv) then
                if (iv % radar(n) % rf(k) % qc >= obs_qc_pointer) then
-                  call da_radar_ze_adj (model_qrnb2(k,n), qrn1,model_qsnb(k,n),qsn1,model_qgrb(k,n),qgr1,model_tc(k,n),model_rho(k,n),jo_grad_y%radar(n)%rf(k))
+                  call da_radar_ze_b (model_qrnb2(k,n), qrn1,model_qsnb(k,n),qsn1,model_qgrb(k,n),qgr1,model_tc(k,n),model_rho(k,n),jo_grad_y%radar(n)%rf(k))
                   model_qrn(k,n) = model_qrn(k,n) + qrn1
                   model_qsn(k,n) = model_qsn(k,n) + qsn1
                   model_qgr(k,n) = model_qgr(k,n) + qgr1         

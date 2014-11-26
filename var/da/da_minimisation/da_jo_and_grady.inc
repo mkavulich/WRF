@@ -385,7 +385,10 @@ subroutine da_jo_and_grady(iv, re, jot, jo, jo_grad_y)
                ' jo_radar          ', jo_radar, &
                '   jo%radar_rv     ', jo%radar_rv, &
                '   jo%radar_rf     ', jo%radar_rf, &
-               '   jo%radar_rr     ', jo%radar_rr
+               '   jo%radar_rrn    ', jo%radar_rrn, &
+               '   jo%radar_rsn    ', jo%radar_rsn, &
+               '   jo%radar_rgr    ', jo%radar_rgr, &
+               '   jo%radar_rqv    ', jo%radar_rqv
       end if
    else
       jo % radar_rv = 0.0

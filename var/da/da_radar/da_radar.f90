@@ -23,7 +23,7 @@ module da_radar
    use da_statistics, only : da_stats_calculate
    use da_tools, only : da_residual, map_info, da_llxy_wrf, da_llxy_default, da_convert_zk
    use da_tracing, only : da_trace_entry, da_trace_exit
-   use da_reporting, only : da_error, da_message, message
+   use da_reporting, only : da_error, da_warning, da_message, message
    use da_tools_serial, only : da_get_unit, da_free_unit
 
    ! The "stats_radar_type" is ONLY used locally in da_radar:
@@ -77,7 +77,8 @@ contains
 #include "da_write_oa_radar_ascii.inc"
 #include "da_radar_rf.inc"
 #include "da_radar_ze.inc"
-#include "da_radar_ze_adj.inc"
+#include "da_radar_ze_b.inc"
+#include "da_radar_ze_d.inc"
 
 end module da_radar
 

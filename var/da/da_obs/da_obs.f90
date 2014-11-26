@@ -87,5 +87,4 @@ contains
 #include "da_set_3d_obs_missing.inc"
 #include "da_setup_div_obs.inc"
 
->>>>>>> .merge-right.r7045
 end module da_obs

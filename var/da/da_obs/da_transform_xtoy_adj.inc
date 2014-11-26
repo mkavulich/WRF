@@ -53,9 +53,7 @@ subroutine da_transform_xtoy_adj(cv_size, cv, grid, iv, jo_grad_y, jo_grad_x)
    if (iv%info(bogus)%nlocal    > 0) call da_transform_xtoy_bogus_adj    (grid, iv, jo_grad_y, jo_grad_x)
    if (iv%info(airsr)%nlocal    > 0) call da_transform_xtoy_airsr_adj    (iv, jo_grad_y, jo_grad_x)
    if (iv%info(pseudo)%nlocal   > 0) call da_transform_xtoy_pseudo_adj   (iv, jo_grad_y, jo_grad_x)
-   if (use_3dvar_dyn)                call da_transform_xtoy_div_adj   (grid, iv, jo_grad_y, jo_grad_x)
-   !print*,"xtoy_jo_grad_xq= ",sum(jo_grad_x % q)
-   !print*,"xtoy_jo_grad_xt= ",sum(jo_grad_x % t)
+   if (use_div_constraint)           call da_transform_xtoy_div_adj   (grid, iv, jo_grad_y, jo_grad_x)
 
 #if defined(CRTM) || defined(RTTOV)
    if (use_rad) then

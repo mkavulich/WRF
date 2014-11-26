@@ -18,7 +18,7 @@ module da_define_structures
       sound, synop, pilot, satem, geoamv, polaramv, airep, gpspw, gpsref, &
       metar, ships, ssmi_rv, ssmi_tb, ssmt1, ssmt2, qscat, profiler, buoy, bogus, &
       mtgirs, tamdar, tamdar_sfc, pseudo, idxdiv, radar, radiance, airsr, sonde_sfc, rain, &
-      trace_use_dull,comm, num_pseudo, use_3dvar_dyn
+      trace_use_dull,comm, num_pseudo, use_div_constraint
 
    use da_tracing, only : da_trace_entry, da_trace_exit
    use da_tools_serial, only : da_array_print

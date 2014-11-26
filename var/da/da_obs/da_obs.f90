@@ -17,7 +17,7 @@ module da_obs
       pseudo_x, fg_format, fg_format_kma_global, fg_format_wrf_arw_regional,fg_format_wrf_nmm_regional, &
       missing_data, pseudo_var, pseudo_val,stdout, num_pseudo, pseudo_y, pseudo_z, &
       pseudo_err,obs_qc_pointer,myproc,rtm_option,rtm_option_rttov, &
-      rtm_option_crtm,use_rad, use_3dvar_dyn, div_error, base_temp, base_lapse, base_pres, &
+      rtm_option_crtm,use_rad, use_div_constraint, div_error, base_temp, base_lapse, base_pres, &
       ob_format,ob_format_ascii,filename_len, trace_use_dull, &
       sound, mtgirs, synop, profiler, gpsref, gpspw, polaramv, geoamv, ships, metar, &
       satem, radar, ssmi_rv, ssmi_tb, ssmt1, ssmt2, airsr, pilot, airep, sonde_sfc,rain, &
@@ -53,7 +53,7 @@ module da_obs
    use da_sound,     only : da_transform_xtoy_sound, da_transform_xtoy_sonde_sfc, &
       da_transform_xtoy_sound_adj, da_transform_xtoy_sonde_sfc_adj
    use da_mtgirs,    only : da_transform_xtoy_mtgirs, da_transform_xtoy_mtgirs_adj
-  use da_tamdar,    only : da_transform_xtoy_tamdar, da_transform_xtoy_tamdar_adj, &
+   use da_tamdar,    only : da_transform_xtoy_tamdar, da_transform_xtoy_tamdar_adj, &
                             da_transform_xtoy_tamdar_sfc, da_transform_xtoy_tamdar_sfc_adj
    use da_ssmi,      only : da_transform_xtoy_ssmt1, da_transform_xtoy_ssmt2, &
       da_transform_xtoy_ssmi_tb, da_transform_xtoy_ssmi_rv, &

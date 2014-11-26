@@ -415,9 +415,7 @@ subroutine da_fill_obs_structures(iv, ob, uvq_direct)
 
    if (iv%info(pseudo)%nlocal > 0 ) call da_setup_pseudo_obs(iv, ob)
    
-   if(use_3dvar_dyn) call da_setup_div_obs(iv, ob)
- ! if (use_3dvar_dyn .and. iv%info(pseudo)%nlocal > 0 ) call da_setup_div_obs(iv, ob)
-  ! if (.not.use_3dvar_dyn .and. iv%info(pseudo)%nlocal > 0 ) call da_setup_pseudo_obs(iv, ob)
+   if (use_div_constraint) call da_setup_div_obs(iv, ob)
 
    ! [2.15] Transfer scatterometer obs:
 

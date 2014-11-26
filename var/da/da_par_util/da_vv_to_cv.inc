@@ -8,7 +8,7 @@ subroutine da_vv_to_cv(vv, xp, mzs, cv_size, rcv)
 
    type (vp_type), intent(in)    :: vv          ! Grdipt/EOF rcv.
    type (xpose_type), intent(in) :: xp          ! Dimensions and xpose buffers.
-   integer,        intent(in)    :: mzs(:) ! Background error structure levels.
+   integer,        intent(in)    :: mzs(:)      ! Background error structure levels.
    integer,        intent(in)    :: cv_size     ! Length of CV array.
    real,           intent(inout) :: rcv(1:cv_size) ! Control variables v.
 
@@ -33,8 +33,7 @@ subroutine da_vv_to_cv(vv, xp, mzs, cv_size, rcv)
       js = xp % jts
       je = xp % jte
    else
-      write(*,'(A," should not be called!"/)')__FILE__
-      call wrf_abort
+      call da_error(__FILE__,__LINE__,(/"This subroutine should not be called for use_rf = .false."/))
    endif
    ix = ie-is+1
    jy = je-js+1

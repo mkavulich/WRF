@@ -216,8 +216,8 @@ module da_control
    real, parameter    :: typical_qrn_rms = 0.00001 ! g/kg
    real, parameter    :: typical_qcw_rms = 0.00001 ! g/kg
    real, parameter    :: typical_qci_rms = 0.00001 ! g/kg
-   real, parameter    :: typical_qsn_rms = 0.00001
-   real, parameter    :: typical_qgr_rms = 0.00001
+   real, parameter    :: typical_qsn_rms = 0.00001 ! g/kg
+   real, parameter    :: typical_qgr_rms = 0.00001 ! g/kg
    real, parameter    :: typical_w_rms = 0.1     ! m/s
    real, parameter    :: typical_rv_rms = 1.0    ! m/s
    real, parameter    :: typical_rf_rms = 1.0    ! dBZ
@@ -493,7 +493,7 @@ module da_control
    integer, parameter :: tamdar    = 26
    integer, parameter :: tamdar_sfc = 27
    integer, parameter :: rain      = 28
-   integer, parameter :: idxdiv    = 29
+   integer, parameter :: idxdiv    = 29 !Pseudo-divergence ob for use_div_constraint
 
    character(len=14), parameter :: obs_names(num_ob_indexes) = (/ &
       "sound         ", &
@@ -524,7 +524,7 @@ module da_control
       "tamdar        ", &
       "tamdar_sfc    ", &
       "rain          ", &
-      "div           " &    
+      "div           " &
    /)
 
    integer, parameter :: max_no_fm = 290

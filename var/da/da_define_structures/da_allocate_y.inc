@@ -281,7 +281,7 @@ subroutine da_allocate_y (iv, y)
         y % pseudo(1:y % nlocal(pseudo)) % q = 0.0
    end if
 
-   if(use_3dvar_dyn) then
+   if(use_div_constraint) then
       allocate(y%div(1:y%nlocal(idxdiv)))
       y%div(1:y%nlocal(idxdiv)) = 0.0
    end if

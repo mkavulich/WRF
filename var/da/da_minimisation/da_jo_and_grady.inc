@@ -379,7 +379,7 @@ subroutine da_jo_and_grady(iv, re, jot, jo, jo_grad_y)
 
    if (iv%info(radar)%nlocal > 0) then
       call da_jo_and_grady_radar(iv, re, jo, jo_grad_y)
-         jo_radar = jo%radar_rv + jo%radar_rf + jo%radar_rrn +  jo%radar_rsn +  jo%radar_rgr + jo%radar_rqv
+      jo_radar = jo%radar_rv + jo%radar_rf + jo%radar_rrn + jo%radar_rsn + jo%radar_rgr + jo%radar_rqv
       if (print_detail_grad) then
           write(unit=stdout, fmt='(a, e24.12)') &
                ' jo_radar          ', jo_radar, &
@@ -391,8 +391,8 @@ subroutine da_jo_and_grady(iv, re, jot, jo, jo_grad_y)
                '   jo%radar_rqv    ', jo%radar_rqv
       end if
    else
-      jo % radar_rv = 0.0
-      jo % radar_rf = 0.0
+      jo % radar_rv  = 0.0
+      jo % radar_rf  = 0.0
       jo % radar_rrn = 0.0
       jo % radar_rsn = 0.0
       jo % radar_rgr = 0.0
@@ -434,10 +434,10 @@ subroutine da_jo_and_grady(iv, re, jot, jo, jo_grad_y)
       jo_pseudo = 0.0
    end if
    
-   if (use_3dvar_dyn) then
+   if (use_div_constraint) then
       call da_jo_and_grady_div(iv, re, jo, jo_grad_y)    
    else
-      jo%div = 0.0
+      jo % div = 0.0
    end if
 
    if (iv%info(qscat)%nlocal > 0) then

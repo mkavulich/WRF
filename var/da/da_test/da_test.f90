@@ -33,12 +33,12 @@ module da_test
       inv_typ_vp3_sumsq,inv_typ_vp2_sumsq,inv_typ_vpalpha_sumsq, &
       inv_typ_vp4_sumsq,typical_rho_rms,balance_geo,balance_cyc,balance_type, &
       balance_geocyc, var4d, num_fgat_time,cv_options_hum_specific_humidity, &
-      cv_options_hum_relative_humidity, ids, ide, jds, jde, kds, kde, &
+      cv_options_hum_relative_humidity, ids, ide, jds, jde, kds, kde, idxdiv, &
       sound, sonde_sfc, mtgirs, synop, profiler, gpsref, gpspw, polaramv, geoamv, ships, metar, &
       satem, radar, ssmi_rv, ssmi_tb, ssmt1, ssmt2, airsr, pilot, airep, tamdar, tamdar_sfc, rain, &
       bogus, buoy, qscat, pseudo, radiance, use_radarobs, use_ssmiretrievalobs,use_rainobs, &
-      use_gpsrefobs, use_ssmt1obs, use_ssmitbobs, use_ssmt2obs, use_gpspwobs,&
-      use_gpsztdobs, use_radar_rf,use_radar_rhv,use_radar_rze, use_rad, crtm_cloud, cloud_cv_options, &
+      use_gpsrefobs, use_ssmt1obs, use_ssmitbobs, use_ssmt2obs, use_gpspwobs, use_div_constraint, &
+      use_gpsztdobs, use_radar_rf, use_radar_rhv, use_radar_rze, use_rad, crtm_cloud, cloud_cv_options, &
       ids,ide,jds,jde,kds,kde, ims,ime,jms,jme,kms,kme, fgat_rain_flags, &
       its,ite,jts,jte,kts,kte, ips,ipe,jps,jpe,kps,kpe, cv_options, cv_size, &
       cloud_cv_options, cp, gas_constant, test_dm_exact, cv_size_domain, &
@@ -128,6 +128,7 @@ contains
 #include "da_check_xtoy_adjoint_tamdar_sfc.inc"
 #include "da_check_xtoy_adjoint_synop.inc"
 #include "da_check_xtoy_adjoint_rad.inc"
+#include "da_check_xtoy_adjoint_div.inc"
 #include "da_transform_xtovp.inc"
 #include "da_check.inc"
 #include "da_dot.inc"

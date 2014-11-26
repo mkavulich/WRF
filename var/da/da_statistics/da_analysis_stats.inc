@@ -54,43 +54,42 @@ subroutine da_analysis_stats  (grid, stats_unit)
 #ifdef CLOUD_CV
    if (rootproc) then
       write(unit=stats_unit, fmt='(/a/)') &
-         ' Minimum of gridded analysis increments'
+           ' Minimum of gridded analysis increments'
       write(unit=stats_unit, fmt='(10a/)') &
-         ' Lvl         ', &
-         'u     i    j          ', &
-         'v     i    j          ', &
-         't     i    j          ', &
-         'p     i    j          ', &
-         'q     i    j          ',&
-         'qcw   i    j          ',&
-         'qrn   i    j          ',&
-         'qci   i    j          ',&
-         'qsn   i    j          '
+           ' Lvl         ', &
+           'u     i    j          ', &
+           'v     i    j          ', &
+           't     i    j          ', &
+           'p     i    j          ', &
+           'q     i    j          ', &
+           'qcw   i    j          ', &
+           'qrn   i    j          ', &
+           'qci   i    j          ', &
+           'qsn   i    j          '
    end if
 #else  
    if (rootproc) then
-      write(unit=stats_unit, fmt='(/a/)') &
-         ' Minimum of gridded analysis increments'
-   if (crtm_cloud .or. use_radar_rf) then
-      write(unit=stats_unit, fmt='(8a/)') &
-         ' Lvl         ', &
-         'u     i    j          ', &
-         'v     i    j          ', &
-         't     i    j          ', &
-         'p     i    j          ', &
-         'q     i    j          ',&
-         'qcw     i    j          ',&
-         'qrn     i    j          '
-   else
-      write(unit=stats_unit, fmt='(7a/)') &
-         ' Lvl         ', &
-         'u     i    j          ', &
-         'v     i    j          ', &
-         't     i    j          ', &
-         'p     i    j          ', &
-         'q     i    j          ', &
-         'div     i    j          '
-   end if
+      write(unit=stats_unit, fmt='(/a/)') ' Minimum of gridded analysis increments'
+      if (crtm_cloud .or. use_radar_rf) then
+         write(unit=stats_unit, fmt='(8a/)') &
+              ' Lvl         ', &
+              'u     i    j          ', &
+              'v     i    j          ', &
+              't     i    j          ', &
+              'p     i    j          ', &
+              'q     i    j          ', &
+              'qcw   i    j          ', &
+              'qrn   i    j          '
+      else
+         write(unit=stats_unit, fmt='(7a/)') &
+              ' Lvl         ', &
+              'u     i    j          ', &
+              'v     i    j          ', &
+              't     i    j          ', &
+              'p     i    j          ', &
+              'q     i    j          ', &
+              'div   i    j          '
+      end if
    end if
 #endif
    call da_maxmin_in_field(grid%xa%u(its:ite,jts:jte,kts:kte), max_u, min_u)
@@ -144,16 +143,16 @@ subroutine da_analysis_stats  (grid, stats_unit)
    do k = kts, kte   
       if (rootproc) then
 #ifdef CLOUD_CV
-            write(unit=stats_unit, fmt='(i4,4(f12.4,2i5),5(e12.4,2i5))') k, &
+         write(unit=stats_unit, fmt='(i4,4(f12.4,2i5),5(e12.4,2i5))') k, &
               min_u(k), min_v(k), min_t(k), min_p(k), min_q(k),min_qcw(k),min_qrn(k),min_qci(k),min_qsn(k)
 #else
          if (crtm_cloud .or. use_radar_rf) then
             write(unit=stats_unit, fmt='(i4,4(f12.4,2i5),3(e12.4,2i5))') k, &
-              min_u(k), min_v(k), min_t(k), min_p(k), min_q(k),min_qcw(k),min_qrn(k)
+                 min_u(k), min_v(k), min_t(k), min_p(k), min_q(k),min_qcw(k),min_qrn(k)
          else
-             if ( abs(min_q(k)%value) < 1.e-30 ) min_q(k)%value = 0.0
-             write(unit=stats_unit, fmt='(i4,4(f12.4,2i5),e12.4,2i5,e12.4,2i5)') k, &
-              min_u(k), min_v(k), min_t(k), min_p(k), min_q(k), min_div(k)
+            if ( abs(min_q(k)%value) < 1.e-30 ) min_q(k)%value = 0.0
+            write(unit=stats_unit, fmt='(i4,4(f12.4,2i5),e12.4,2i5,e12.4,2i5)') k, &
+                 min_u(k), min_v(k), min_t(k), min_p(k), min_q(k), min_div(k)
          end if
 #endif
       end if
@@ -164,10 +163,10 @@ subroutine da_analysis_stats  (grid, stats_unit)
       qm=minval(min_q(:)%value)
       divm=minval(min_div(:)%value)
 #ifdef CLOUD_CV
-         qcwm=minval(min_qcw(:)%value)
-         qrnm=minval(min_qrn(:)%value)
-         qcim=minval(min_qci(:)%value)
-         qsnm=minval(min_qsn(:)%value)
+      qcwm=minval(min_qcw(:)%value)
+      qrnm=minval(min_qrn(:)%value)
+      qcim=minval(min_qci(:)%value)
+      qsnm=minval(min_qsn(:)%value)
 #else
       if (crtm_cloud .or. use_radar_rf) then
          qcwm=minval(min_qcw(:)%value)

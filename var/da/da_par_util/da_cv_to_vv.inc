@@ -28,8 +28,7 @@ subroutine da_cv_to_vv (cv_size, rcv, mzs, vv)
       js = jts
       je = jte
    else
-      write(*,'(A," should not be called!"/)')__FILE__
-      call wrf_abort
+      call da_error(__FILE__,__LINE__,(/"This subroutine should not be called for use_rf = .false."/))
    endif
    ix = ie-is+1
    jy = je-js+1

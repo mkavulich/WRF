@@ -50,7 +50,6 @@ end subroutine da_trace_exit
 #include "da_get_field.inc"
 #include "da_get_height.inc"
 #include "da_get_trh.inc"
-#include "da_get_tqv.inc"
 #include "da_print_be_stats_h_global.inc"
 #include "da_print_be_stats_h_regional.inc"
 #include "da_print_be_stats_p.inc"

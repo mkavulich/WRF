@@ -19,7 +19,7 @@ program gen_be_stage0_wrf
 
    use da_control, only : num_fft_factors, pi, stdout, stderr, &
       filename_len, base_pres, base_temp, base_lapse
-   use da_gen_be, only : da_get_field, da_get_height, da_get_trh, da_get_tqv, &
+   use da_gen_be, only : da_get_field, da_get_height, da_get_trh, &
       da_stage0_initialize
    use da_tools_serial, only : da_get_unit, da_free_unit,da_find_fft_factors, &
       da_find_fft_trig_funcs
@@ -39,10 +39,13 @@ program gen_be_stage0_wrf
    character (len=3)     :: be_method                 ! "NMC" or "ENS".
    character (len=3)     :: cne                       ! Ensemble size.
    character (len=3)     :: ce                        ! Member index -> character.
+   character (len=3)     :: ccv_options               ! Control variable input
 
-   integer               :: iargc
+
+   integer, external     :: iargc
    integer               :: numarg
    integer               :: ne                        ! Ensemble size.
+   integer               :: cv_options                ! Control variable option
    integer               :: i, j, k, member           ! Loop counters.
    integer               :: dim1                      ! Dimensions of grid (T points).
    integer               :: dim1s                     ! Dimensions of grid (vor/psi pts).
@@ -99,10 +102,6 @@ program gen_be_stage0_wrf
    real, allocatable     :: rh_mean(:,:,:)            ! Relative humidity.
    real, allocatable     :: psfc_mean(:,:)            ! Surface pressure.
 
-   logical               :: cv_uv_direct, cv_qv_direct
-
-   cv_uv_direct = .true.
-   cv_qv_direct = .false.
 
    stderr = 0
    stdout = 6
@@ -116,15 +115,14 @@ program gen_be_stage0_wrf
    call da_get_unit(gen_be_iunit)
    call da_get_unit(gen_be_ounit)
 
-   test_inverse = .true. 
    ktest = 1
    poisson_method = 1    
    fft_method = 2
 
    numarg = iargc()
-   if ( numarg /= 4 )then
+   if ( numarg /= 5 )then
       write(UNIT=6,FMT='(a)') &
-        "Usage: gen_be_stage0_wrf be_method date ne <wrf_file_stub> Stop"
+        "Usage: gen_be_stage0_wrf be_method date ne <wrf_file_stub> cv_options Stop"
       stop
    end if
    
@@ -133,12 +131,25 @@ program gen_be_stage0_wrf
    date=""
    cne=""
    filestub=""
+   ccv_options=""
 
    call getarg( 1, be_method )
    call getarg( 2, date )
    call getarg( 3, cne )
    read(cne,'(i3)')ne
    call getarg( 4, filestub )
+   call getarg( 5, ccv_options )
+   read(ccv_options,'(i3)')cv_options
+
+   if ( cv_options == 7 ) then
+      test_inverse = .false. ! Should not run psi/chi calculation test for cv_options=7
+   else if ( cv_options == 5 ) then
+      test_inverse = .true.
+   else
+      write(UNIT=stderr,FMT='(A)') "Invalid cv_options; Stop"
+      stop
+   end if
+
 
    if ( be_method == "NMC" ) then
       write(6,'(a,a)')' Computing gen_be NMC-method forecast difference files for date ', date
@@ -271,39 +282,31 @@ program gen_be_stage0_wrf
                                   u, v, psi2d, chi2d )
          end if
 
-         if( cv_uv_direct)then
-         ! Interpolate psi to mass pts ready for output:
-         do j = 1, dim2
-            do i = 1, dim1
-               psi(i,j,k) = 0.25 * ( u(i,j) + u(i+1,j) + &
-                                     u(i,j+1) + u(i+1,j+1) )
-               chi(i,j,k) = 0.25 * ( v(i,j) + v(i+1,j) + &
-                                     v(i,j+1) + v(i+1,j+1) )
+         if ( cv_options == 7 ) then
+            ! For cv_options == 7, u is stored in psi, v is stored in chi
+            do j = 1, dim2
+               do i = 1, dim1
+                  psi(i,j,k) = 0.25 * ( u(i,j) + u(i+1,j) + &
+                               u(i,j+1) + u(i+1,j+1) )
+                  chi(i,j,k) = 0.25 * ( v(i,j) + v(i+1,j) + &
+                               v(i,j+1) + v(i+1,j+1) )
+               end do
             end do
-         end do
-         else
-
-!        Interpolate psi to mass pts ready for output:
-         do j = 1, dim2
-            do i = 1, dim1
-               psi(i,j,k) = 0.25 * ( psi2d(i,j) + psi2d(i+1,j) + &
-                                     psi2d(i,j+1) + psi2d(i+1,j+1) )
+         else if (cv_options == 5) then
+            ! Interpolate psi to mass pts ready for output:
+            do j = 1, dim2
+               do i = 1, dim1
+                  psi(i,j,k) = 0.25 * ( psi2d(i,j) + psi2d(i+1,j) + &
+                               psi2d(i,j+1) + psi2d(i+1,j+1) )
+               end do
             end do
-         end do
-         chi(:,:,k) = chi2d(:,:)
+            chi(:,:,k) = chi2d(:,:)
          end if 
 
 !        Read mass fields, and convert to T and rh:
-        if (cv_qv_direct) then
-         call da_get_tqv( input_file, dim1, dim2, dim3, k, temp2d, rh2d )
-         temp(:,:,k) = temp2d(:,:)
-!        g/kg
-         rh(:,:,k) =  rh2d(:,:)
-        else
          call da_get_trh( input_file, dim1, dim2, dim3, k, temp2d, rh2d )
          temp(:,:,k) = temp2d(:,:)
          rh(:,:,k) = 0.01 * rh2d(:,:) ! *0.01 to conform with WRF-Var units.
-        end if 
       end do
 
       call da_get_height( input_file, dim1, dim2, dim3, height )

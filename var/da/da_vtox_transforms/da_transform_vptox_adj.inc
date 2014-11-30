@@ -211,11 +211,11 @@ subroutine da_transform_vptox_adj(grid, vp, be, ep)
 
    ! Transform psi and chi to u and v:
 
-   if (uv_cv_options.eq.0) then
-   call da_psichi_to_uv_adj(grid%xa % u, grid%xa % v, grid%xb % coefx, grid%xb % coefy, vp % v1, vp % v2)
-   else
-    vp%v1 = grid%xa%u + vp%v1
-    vp%v2 = grid%xa%v + vp%v2
+   if ( cv_options == 5 .or. cv_options == 6 ) then
+      call da_psichi_to_uv_adj(grid%xa % u, grid%xa % v, grid%xb % coefx, grid%xb % coefy, vp % v1, vp % v2)
+   else if ( cv_options == 7) then
+      vp%v1 = grid%xa%u + vp%v1
+      vp%v2 = grid%xa%v + vp%v2
    end if
 
    !--------------------------------------------------------------------------

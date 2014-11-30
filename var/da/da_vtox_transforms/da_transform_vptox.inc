@@ -177,10 +177,10 @@ subroutine da_transform_vptox(grid, vp, be, ep)
 #endif
 
    ! Psi and chi to u and v:
-   if (uv_cv_options.eq.0) then
-   call da_psichi_to_uv(vp % v1, vp % v2, grid%xb % coefx, &
-      grid%xb % coefy , grid%xa % u, grid%xa % v)
-   else
+   if ( cv_options == 5 .or. cv_options == 6 ) then
+      call da_psichi_to_uv(vp % v1, vp % v2, grid%xb % coefx, &
+           grid%xb % coefy , grid%xa % u, grid%xa % v)
+   else if ( cv_options == 7 ) then
       grid%xa%u = vp%v1
       grid%xa%v = vp%v2
    end if

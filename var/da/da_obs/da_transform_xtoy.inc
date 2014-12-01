@@ -50,7 +50,6 @@ subroutine da_transform_xtoy(cv_size, cv, grid, iv, y)
    if (iv%info(bogus)%nlocal          > 0) call da_transform_xtoy_bogus    (grid, iv, y)
    if (iv%info(airsr)%nlocal          > 0) call da_transform_xtoy_airsr    (grid, iv, y)
    if (iv%info(pseudo)%nlocal         > 0) call da_transform_xtoy_pseudo   (grid, iv, y)
-   if (use_div_constraint)                 call da_transform_xtoy_div      (grid, iv, y)
 
    if (use_rad) then
       if (rtm_option == rtm_option_rttov) then

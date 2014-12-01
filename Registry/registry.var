@@ -163,8 +163,6 @@ rconfig   logical   use_radar_rze           namelist,wrfvar4  1  .false.  - "use
 rconfig   logical   use_radar_rqv           namelist,wrfvar4  1  .false.  - "use_radar_rqv"            ""  ""
 rconfig   logical   use_radar_rhv           namelist,wrfvar4  1  .false.  - "use_radar_rhv"            ""  ""
 rconfig   logical   use_3dvar_phy           namelist,wrfvar4  1  .true.   - "use_3dvar_phy"            ""  ""
-rconfig   logical   use_div_constraint      namelist,wrfvar4  1  .false.  - "use_div_constraint"       ""  ""
-rconfig   real      div_error               namelist,wrfvar4  1   0.001   - "div_error"                ""  ""
 rconfig   logical   use_rainobs             namelist,wrfvar4  1  .false.  - "use_rainobs"              ""  ""   
 rconfig   logical   use_hirs2obs            namelist,wrfvar4  1  .false.  - "use_hirs2obs"             ""  ""
 rconfig   logical   use_hirs3obs            namelist,wrfvar4  1  .false.  - "use_hirs3obs"             ""  ""
@@ -584,7 +582,6 @@ typedef xb_type real    w                      ijk      -         1        -    
 typedef xb_type real    t                      ijk      -         1        -       -
 typedef xb_type real    p                      ijk      -         1        -       -
 typedef xb_type real    q                      ijk      -         1        -       -
-typedef xb_type real    div                      ijk      -         1        -       -
 typedef xb_type real    qrn                    ijk      -         1        -       -
 typedef xb_type real    qcw                    ijk      -         1        -       -
 typedef xb_type real    qci                    ijk      -         1        -       -
@@ -658,7 +655,6 @@ typedef x_type real    w                      ijk      -         1        -     
 typedef x_type real    t                      ijk      -         1        -       -
 typedef x_type real    q                      ijk      -         1        -       -
 typedef x_type real    p                      ijk      -         1        -       -
-typedef x_type real    div                      ijk      -         1        -       -
 typedef x_type real    rh                     ijk      -         1        -       -
 typedef x_type real    rho                    ijk      -         1        -       -
 typedef x_type real    wh                     ijk      -         1        -       -

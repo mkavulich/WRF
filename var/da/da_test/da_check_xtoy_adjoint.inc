@@ -347,7 +347,6 @@ print*,__FILE__,jte,' xa2_v.xa2_v for row= ',jte+1,sum(xa2_v(its:ite, jte+1, kts
       if (iv%info(bogus)%nlocal    > 0) call da_check_xtoy_adjoint_bogus    (iv, y, partial_lhs, pertile_lhs)
       if (iv%num_inst              > 0) call da_check_xtoy_adjoint_rad      (iv, y, partial_lhs, pertile_lhs)
       if (iv%info(rain)%nlocal     > 0) call da_check_xtoy_adjoint_rain     (iv, y, partial_lhs, pertile_lhs)
-      if (use_div_constraint          ) call da_check_xtoy_adjoint_div      (iv, y, partial_lhs, pertile_lhs)
 
       !----------------------------------------------------------------------
       ! [5.0] Perform adjoint operation:

@@ -493,7 +493,6 @@ module da_control
    integer, parameter :: tamdar    = 26
    integer, parameter :: tamdar_sfc = 27
    integer, parameter :: rain      = 28
-   integer, parameter :: idxdiv    = 29 !Pseudo-divergence ob for use_div_constraint
 
    character(len=14), parameter :: obs_names(num_ob_indexes) = (/ &
       "sound         ", &
@@ -523,8 +522,7 @@ module da_control
       "mtgirs        ", &
       "tamdar        ", &
       "tamdar_sfc    ", &
-      "rain          ", &
-      "div           " &
+      "rain          " &
    /)
 
    integer, parameter :: max_no_fm = 290

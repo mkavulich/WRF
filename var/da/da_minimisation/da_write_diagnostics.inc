@@ -63,7 +63,6 @@ subroutine da_write_diagnostics(it, grid,num_qcstat_conv, ob, iv, re, y, j)
 #endif
 
    if (num_pseudo > 0) call da_oi_stats_pseudo (stats_unit, iv)
-   if (use_div_constraint)  call da_oi_stats_div    (stats_unit, iv)
 
    !---- ----------------------------------------------------------------------
    ! [2.0] Calculate residual vector (O-A) statistics:
@@ -102,7 +101,6 @@ if (.not. anal_type_verify) then
 #endif
 
    if (num_pseudo > 0) call da_ao_stats_pseudo (stats_unit, iv, re)
-   if (use_div_constraint) call da_ao_stats_div    (stats_unit, iv, re)
 
    !---------------------------------------------------------------------------
    ! [3.0] Calculate analysis increment (A-B) statistics:

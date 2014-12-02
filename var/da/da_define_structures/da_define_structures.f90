@@ -821,11 +821,11 @@ module da_define_structures
    type residual_radar_type
       real, pointer :: rv(:)                    ! rv
       real, pointer :: rf(:)                    ! rf
-      real, pointer :: rrn(:)                   ! rr
-      real, pointer :: rcl(:)                   ! r
-      real, pointer :: rci(:)                   ! r
-      real, pointer :: rsn(:)                   ! r
-      real, pointer :: rgr(:)                   ! r
+      real, pointer :: rrn(:)                   ! rrain
+      real, pointer :: rcl(:)                   ! rcloud
+      real, pointer :: rci(:)                   ! rcloudice
+      real, pointer :: rsn(:)                   ! rsnow
+      real, pointer :: rgr(:)                   ! rgraupel
       real, pointer :: rqv(:) 
    end type residual_radar_type
 

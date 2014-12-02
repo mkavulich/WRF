@@ -157,7 +157,6 @@ subroutine da_vv_to_cv(vv, xp, mzs, cv_size, rcv)
 #else
       rcv(cv_s:cv_e) = RESHAPE(vv % v6(is:ie,js:je,1:mz), (/ijm/))
 #endif
-   print*,"sum(cv6)= ",sum(rcv(cv_s:cv_e))
    end if
    ! Store v7
    mz = mzs(7)
@@ -177,8 +176,7 @@ subroutine da_vv_to_cv(vv, xp, mzs, cv_size, rcv)
 #else
       rcv(cv_s:cv_e) = RESHAPE(vv % v7(is:ie,js:je,1:mz), (/ijm/))
 #endif
-   print*,"sum(cv7)= ",sum(rcv(cv_s:cv_e)) 
-  end if
+   end if
    ! Store v8
    mz = mzs(8)
    if (mz > 0) then
@@ -197,8 +195,7 @@ subroutine da_vv_to_cv(vv, xp, mzs, cv_size, rcv)
 #else
       rcv(cv_s:cv_e) = RESHAPE(vv % v8(is:ie,js:je,1:mz), (/ijm/))
 #endif
-   print*,"sum(cv8)= ",sum(rcv(cv_s:cv_e)) 
-  end if
+   end if
    ! Store v9
    mz = mzs(9)
    if (mz > 0) then
@@ -217,7 +214,6 @@ subroutine da_vv_to_cv(vv, xp, mzs, cv_size, rcv)
 #else
       rcv(cv_s:cv_e) = RESHAPE(vv % v9(is:ie,js:je,1:mz), (/ijm/))
 #endif
-   print*,"sum(cv9)= ",sum(rcv(cv_s:cv_e))
    end if
    ! Store v10
    mz = mzs(10)
@@ -237,7 +233,6 @@ subroutine da_vv_to_cv(vv, xp, mzs, cv_size, rcv)
 #else
       rcv(cv_s:cv_e) = RESHAPE(vv % v10(is:ie,js:je,1:mz), (/ijm/))
 #endif
-   print*,"sum(cv10)= ",sum(rcv(cv_s:cv_e))
    end if
    ! Store v11
    mz = mzs(11)
@@ -257,7 +252,6 @@ subroutine da_vv_to_cv(vv, xp, mzs, cv_size, rcv)
 #else
       rcv(cv_s:cv_e) = RESHAPE(vv % v11(is:ie,js:je,1:mz), (/ijm/))
 #endif
-   print*,"sum(cv11)= ",sum(rcv(cv_s:cv_e))
    end if
 #endif
 #ifdef CLOUD_CV

@@ -1,4 +1,3 @@
-!/glade/p/work/tong/code/wrfda_r6464rf/var/da/da_radar
 subroutine da_get_innov_vector_radar (it, grid, ob, iv)
 
    !-----------------------------------------------------------------------
@@ -265,8 +264,6 @@ END IF
 					 end if !it==1 wenxue
                      call da_radar_ze (model_qrn(k,n),model_qsn(k,n),model_qgr(k,n),model_tc(k,n),model_rho(k,n),rze2)
                      iv % radar(n) % rf(k) % inv = ob % radar(n) % rf(k) - rze2 
-                     print*,"zeo,Zem= ",rze1,rze2
-                     print*,"inv err= ",iv % radar(n) % rf(k) % inv, iv % radar(n) % rf(k) % error/rze1*100
                   else
                      iv % radar(n) % rf(k) % qc = -5
                   end if
@@ -293,7 +290,6 @@ END IF
                            ! call dz_radar_rf (ra,rs,rg,tc1,ro1,rze, dbz)
                            call da_radar_rf (model_qrn(k,n),model_qsn(k,n),model_qgr(k,n),model_tc(k,n),model_rho(k,n),rze1,dbz1)
                            if (iv % radar(n) % rrno(k) .ge. 0.015.or.ob % radar(n) % rf(k).ge.55) then
-                              print*,'rr_obs= ',iv % radar(n) % rrno(k),ob % radar(n) % rf(k),model_rho(k,n)
                               iv % radar(n) % rrn(k) % qc = -5  ! old -5 
                            else
                               iv % radar(n) % rrn(k) % qc = 0
@@ -330,8 +326,8 @@ END IF
                              iv % radar(n) % rgr(k) % qc = 0
                         end if  ! temp
                      end if  ! it=1
-                   iv % radar(n) % rsn(k) % qc = -5  ! wenxue
-				   iv % radar(n) % rgr(k) % qc = -5 ! wenxue
+!                     iv % radar(n) % rsn(k) % qc = -5  ! wenxue
+!                     iv % radar(n) % rgr(k) % qc = -5 ! wenxue
                      if (iv % radar(n) % rrn(k) % qc >= obs_qc_pointer) then
                         ! x=b**y; y=logb(x)
                         iv % radar(n) % rrn(k) % inv = iv % radar(n) % rrno(k) - model_qrn(k,n)
@@ -370,24 +366,23 @@ END IF
                !same condtions as use_radar_rf
                if (abs(iv % radar(n) % rf(k) % qc - missing_data) > 1) then
                   if (abs(ob % radar(n) % rf(k) - missing_r) > 1.0 .AND. &
-                     iv % radar(n) % rf(k) % qc >= obs_qc_pointer) then
+                       iv % radar(n) % rf(k) % qc >= obs_qc_pointer) then
                    
-					if ( ob % radar(n) % rf(k) .lt. 30.0 .or. iv%radar(n)%model_p(k).gt.80000.0 .or. zr.lt.2500)then
+                     if ( ob % radar(n) % rf(k) .lt. 30.0 .or. iv%radar(n)%model_p(k).gt.80000.0 .or. zr.lt.2500)then
                         iv % radar(n) % rqv(k) % qc = -5
                      else
                         iv % radar(n) % rqv(k) % qc = 0
                      end if
-					 if (iv % radar(n) % rqv(k) % qc >= obs_qc_pointer) then
+                     if (iv % radar(n) % rqv(k) % qc >= obs_qc_pointer) then
                         if (ob % radar(n) % rf(k) >= 30.0 .and. ob % radar(n) % rf(k) < 40.0) then
-						  iv % radar(n) % rqvo(k)= 1.0*model_qs(k,n)
-						else if (ob % radar(n) % rf(k) >= 40.0 .and. ob % radar(n) % rf(k) < 50.0) then
-						  iv % radar(n) % rqvo(k)= 1.0*model_qs(k,n)
-						end if 
+                           iv % radar(n) % rqvo(k)= 1.0*model_qs(k,n)
+                        else if (ob % radar(n) % rf(k) >= 40.0 .and. ob % radar(n) % rf(k) < 50.0) then
+                           iv % radar(n) % rqvo(k)= 1.0*model_qs(k,n)
+                        end if 
                         iv % radar(n) % rqv(k) % inv = iv % radar(n) % rqvo(k) - model_qv(k,n)
                         ! iv % radar(n) % rqv(k) % inv must be >= 0.0
-                         iv % radar(n) % rqv(k) % inv = amax1(0.0,iv % radar(n) % rqv(k) % inv )
-                         iv % radar(n) % rqv(k) % error = amax1(0.001,0.20*iv % radar(n) % rqvo(k))
-                        !print*,'radar_inv= ',ob % radar(n) % rf(k),iv % radar(n) % rf(k) % error,iv % radar(n) % rro(k),iv % radar(n) % rrn(k) % error
+                        iv % radar(n) % rqv(k) % inv = amax1(0.0,iv % radar(n) % rqv(k) % inv )
+                        iv % radar(n) % rqv(k) % error = amax1(0.001,0.20*iv % radar(n) % rqvo(k))
                      end if
                   end if ! obs qc and mising
                end if  ! iv qc and missing
@@ -434,6 +429,7 @@ END IF
    deallocate (model_tc)
 
    deallocate (model_qrn)
+   deallocate (model_rho)
    deallocate (model_qcl) 
    deallocate (model_qci)
    deallocate (model_qsn)

@@ -106,6 +106,7 @@ subroutine da_setup_be_regional(xb, be, grid)
    character*5                 :: namv(5)=(/"psi  ","chi_u","t_u  ","rh   ","ps_u "/)
    character*10                :: variable
    character*80                :: var80c
+   character(len=1000)         :: write_fmt
    integer                     :: ni, nj, nk, nk_2d, b
    integer                     :: ix, jy, kz, kzs(5), mz, mzs(5)
    real, allocatable   :: regcoeff_psi_chi(:)        ! psi/chi    regression cooefficient.
@@ -746,8 +747,9 @@ subroutine da_setup_be_regional(xb, be, grid)
    ! 2.2.5 Control variable ps_u
    read (be_unit) variable
    read (be_unit) nk_2d, num_bins2d
-   print *, "nk_2d=", nk_2d
-   nk_2d=1       !wenxue
+#ifdef CLOUD_CV
+   nk_2d=1
+#endif
    allocate (evec_loc(1:nk_2d,1:nk_2d,1:num_bins2d))
    allocate (eval_loc(1:nk_2d,        1:num_bins2d))
    read (be_unit)  be5_evec_glo

@@ -33,11 +33,11 @@ subroutine da_transform_xtoy_adj(cv_size, cv, grid, iv, jo_grad_y, jo_grad_x)
    if (iv%info(metar)%nlocal    > 0) call da_transform_xtoy_metar_adj    (grid, iv, jo_grad_y, jo_grad_x)
    if (iv%info(ships)%nlocal    > 0) call da_transform_xtoy_ships_adj    (grid, iv, jo_grad_y, jo_grad_x)
    if (iv%info(gpspw)%nlocal    > 0) then
-     if (use_gpspwObs) then
-       call da_transform_xtoy_gpspw_adj    (grid, iv, jo_grad_y, jo_grad_x)
-     else if (use_gpsztdObs) then
-       call da_transform_xtoy_gpsztd_Adj   (grid, iv, jo_grad_y, jo_grad_x)
-     endif
+      if (use_gpspwobs) then
+         call da_transform_xtoy_gpspw_adj    (grid, iv, jo_grad_y, jo_grad_x)
+      else if (use_gpsztdobs) then
+         call da_transform_xtoy_gpsztd_adj   (grid, iv, jo_grad_y, jo_grad_x)
+      endif
    end if
    if (iv%info(ssmi_tb)%nlocal  > 0) call da_transform_xtoy_ssmi_tb_adj  (grid, iv, jo_grad_y, jo_grad_x)
    if (iv%info(ssmi_rv)%nlocal  > 0) call da_transform_xtoy_ssmi_rv_adj  (grid, iv, jo_grad_y, jo_grad_x)

@@ -434,7 +434,6 @@ subroutine da_read_obs_radar (iv, filename, grid)
                      allocate (iv % radar (ilocal) % height_qc(1:iv%info(radar)%max_lev))
                      allocate (iv % radar (ilocal) % rv       (1:iv%info(radar)%max_lev))
                      allocate (iv % radar (ilocal) % rf       (1:iv%info(radar)%max_lev))
-!whl
                      allocate (iv % radar (ilocal) % rrn      (1:iv%info(radar)%max_lev))
                      allocate (iv % radar (ilocal) % rcl      (1:iv%info(radar)%max_lev))
                      allocate (iv % radar (ilocal) % rci      (1:iv%info(radar)%max_lev))
@@ -455,7 +454,6 @@ subroutine da_read_obs_radar (iv, filename, grid)
                      iv % radar (ilocal) % height_qc(i) = platform % each(i) % height_qc
                      iv % radar (ilocal) % rv(i)        = platform % each(i) % rv
                      iv % radar (ilocal) % rf(i)        = platform % each(i) % rf
-!whl
                      iv % radar (ilocal) % rrn(i) % inv  = missing_r
                      iv % radar (ilocal) % rrn(i) % qc   = missing_data
                      iv % radar (ilocal) % rrn(i) % error= missing_r

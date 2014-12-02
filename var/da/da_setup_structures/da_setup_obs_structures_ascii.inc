@@ -145,7 +145,7 @@ subroutine da_setup_obs_structures_ascii( ob, iv, grid )
             call da_scan_obs_radar(iv, filename, grid)
          end if
          
-		 iv%info(:)%plocal(n) = iv%info(:)%nlocal
+         iv%info(:)%plocal(n) = iv%info(:)%nlocal
          iv%info(:)%ptotal(n) = iv%info(:)%ntotal
       end do
    else
@@ -162,7 +162,7 @@ subroutine da_setup_obs_structures_ascii( ob, iv, grid )
       if (use_radarobs) then
          call da_scan_obs_radar(iv, 'ob.radar', grid)
       end if
-	 
+
       do i=1,num_ob_indexes
          iv%info(i)%plocal(iv%time) = iv%info(i)%nlocal
          iv%info(i)%ptotal(iv%time) = iv%info(i)%ntotal

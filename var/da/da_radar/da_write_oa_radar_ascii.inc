@@ -37,7 +37,7 @@ subroutine da_write_oa_radar_ascii ( ob, iv, re, it )
    call da_warning(__FILE__,__LINE__,message(1:1))
    if (trace_use) call da_trace_exit("da_write_oa_radar_ascii")
    return
-   write(unit=filename, fmt='(a,i2.2,a)') 'radar_omb_oma_',it,'.0000'
+!   write(unit=filename, fmt='(a,i2.2,a)') 'radar_omb_oma_',it,'.0000'
 #endif
    call da_get_unit(oma_radar_unit)
    open(unit=oma_radar_unit,file=trim(filename),form='formatted',iostat=ios)

@@ -29,7 +29,7 @@ subroutine da_setup_obs_structures( grid, ob, iv, j_cost)
    if (use_synopobs .OR. use_shipsobs .OR. use_metarobs .OR. use_pilotobs .OR. &
       use_profilerobs .OR. use_buoyobs .OR. use_soundobs .OR. use_mtgirsobs .OR. use_bogusobs .OR. &
       use_satemobs .OR. use_geoamvobs .OR. use_polaramvobs .OR. use_airepobs .OR. use_tamdarobs .OR. &
-      use_gpspwobs .OR. use_gpsztdobs .OR. use_gpsrefobs .OR. use_ssmiretrievalobs .OR. &
+      use_gpspwobs .OR. use_gpsztdobs .OR. use_gpsrefobs .OR. use_gpsephobs .OR. use_ssmiretrievalobs .OR. &
       use_ssmitbobs .OR. use_ssmt1obs .OR. use_ssmt2obs .OR. use_qscatobs .OR. &
       use_airsretobs) then
  
@@ -75,6 +75,7 @@ subroutine da_setup_obs_structures( grid, ob, iv, j_cost)
       use_gpspwobs         = .false.
       use_gpsztdobs        = .false.
       use_gpsrefobs        = .false.
+      use_gpsephobs        = .false.
       use_ssmiretrievalobs = .false.
       use_ssmitbobs        = .false.
       use_ssmt1obs         = .false.
@@ -122,6 +123,7 @@ subroutine da_setup_obs_structures( grid, ob, iv, j_cost)
       use_gpspwobs         = .false.
       use_gpsztdobs        = .false.
       use_gpsrefobs        = .false.
+      use_gpsephobs        = .false.
       use_ssmiretrievalobs = .false.
       use_ssmitbobs        = .false.
       use_ssmt1obs         = .false.

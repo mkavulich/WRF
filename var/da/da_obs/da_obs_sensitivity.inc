@@ -396,7 +396,22 @@ subroutine da_obs_sensitivity(ktr, iv)
               end do
 	    end do
 	 end if   
-	       
+
+         if (iv%info(gpseph)%nlocal > 0) then
+            do n=1, iv%info(gpseph)%nlocal
+               if (.not. iv%info(gpseph)%proc_domain(1,n)) cycle
+               if ( iv%info(gpseph)%levels(n) < 1 ) cycle
+               do k=1, iv%info(gpseph)%levels(n) !hcl check the handling of levels
+                  if (iv%gpseph(n)%eph(k)%qc < obs_qc_pointer) cycle
+                  iv%gpseph(n)%eph(k)%sens = ktr%gpseph(n)%eph(k) / (iv%gpseph(n)%eph(k)%error ** 2)
+
+                  iv%gpseph(n)%eph(k)%inv  = iv%gpseph(n)%eph(k)%inv * iv%gpseph(n)%eph(k)%sens
+
+                  ktd(gpseph,rv) = ktd(gpseph,rv) + iv%gpseph(n)%eph(k)%inv
+              end do
+            end do
+         end if
+
          if (iv%info(ssmi_rv)%nlocal > 0) then
             do n=1, iv%info(ssmi_rv)%nlocal
 	       if (.not. iv%info(ssmi_rv)%proc_domain(1,n)) cycle

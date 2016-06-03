@@ -738,6 +738,32 @@ subroutine da_search_obs (ob_type_string, unit_in, num_obs, nth, iv, found_flag)
    rewind (unit_in)
    read(unit_in,*)
 
+   CASE ('gpseph')
+
+   do n = 1, num_obs
+      read(unit_in,'(2i8,a5,2E22.13)') n_dummy, levels, stn_id, lat, lon
+      if ( iv%info(gpseph)%id(nth)  == stn_id .and.  &
+           iv%info(gpseph)%lat(1,nth) == lat    .and.  &
+           iv%info(gpseph)%lon(1,nth) == lon ) then
+        do k = 1, levels !hcl check
+          read(unit_in,'(E22.13,(E22.13,i8,3E22.13))')&
+                     iv % gpseph(nth) % h(k), &             ! Obs Height
+                     iv%gpseph(nth)%eph(k) ! O-B eph
+        enddo
+        found_flag = .true.
+        rewind (unit_in)
+        read(unit_in,*)
+        return
+      else
+        do k = 1, levels
+          read(unit_in,*)
+        enddo
+      endif
+   enddo
+   !found_flag = .false.
+   rewind (unit_in)
+   read(unit_in,*)
+
    CASE default;
  
    write(unit=message(1), fmt='(a,a20,a,i3)') &

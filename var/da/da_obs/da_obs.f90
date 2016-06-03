@@ -13,17 +13,17 @@ module da_obs
       use_soundobs,use_mtgirsobs,use_satemobs, use_profilerobs, use_pilotobs, &
       use_qscatobs,use_metarobs, use_polaramvobs, use_geoamvobs, &
       use_bogusobs,use_buoyobs, use_airsretobs, use_tamdarobs, trace_use, num_procs, &
-      xmiss, missing_r, missing, use_airepobs,use_gpspwobs,use_gpsztdobs,use_gpsrefobs, &
+      xmiss, missing_r, missing, use_airepobs,use_gpspwobs,use_gpsztdobs,use_gpsrefobs,use_gpsephobs, &
       use_ssmt1obs,filtered_obs_unit,fmt_each,fmt_info,fmt_srfc, ide, jde, &
       pseudo_x, fg_format, fg_format_kma_global, fg_format_wrf_arw_regional,fg_format_wrf_nmm_regional, &
       missing_data, pseudo_var, pseudo_val,stdout, num_pseudo, pseudo_y, pseudo_z, &
       pseudo_err,obs_qc_pointer,myproc,rtm_option,rtm_option_rttov, &
       rtm_option_crtm,use_rad, base_temp, base_lapse, base_pres, &
-      ob_format,ob_format_ascii,filename_len, trace_use_dull, &
-      sound, mtgirs, synop, profiler, gpsref, gpspw, polaramv, geoamv, ships, metar, &
+      ob_format,ob_format_ascii,filename_len, trace_use_dull, gpseph_nonlocal, &
+      sound, mtgirs, synop, profiler, gpsref, gpseph, gpspw, polaramv, geoamv, ships, metar, &
       satem, radar, ssmi_rv, ssmi_tb, ssmt1, ssmt2, airsr, pilot, airep, sonde_sfc,rain, &
       bogus, buoy, qscat, tamdar, tamdar_sfc, pseudo, num_ob_indexes, its,ite,jds,jts,jte,ids, &
-      write_mod_filtered_obs, radiance, use_varbc, obs_names
+      write_mod_filtered_obs, radiance, use_varbc, obs_names, kts,kte,kds,kde
    ! use_crtm_kmatrix,use_crtm_kmatrix_fast
 #ifdef CRTM
    use da_crtm, only : da_transform_xtoy_crtm, da_transform_xtoy_crtm_adj
@@ -34,6 +34,7 @@ module da_obs
    use da_gpspw,     only : da_transform_xtoy_gpspw,da_transform_xtoy_gpspw_adj, &
                             da_transform_xtoy_gpsztd,da_transform_xtoy_gpsztd_adj
    use da_gpsref,    only : da_transform_xtoy_gpsref,da_transform_xtoy_gpsref_adj
+   use da_gpseph,    only : da_transform_xtoy_gpseph,da_transform_xtoy_gpseph_adj
    use da_metar,     only : da_transform_xtoy_metar, da_transform_xtoy_metar_adj
    use da_physics,   only : da_tp_to_qs,da_get_q_error
    use da_pilot,     only : da_transform_xtoy_pilot,da_transform_xtoy_pilot_adj
@@ -64,6 +65,8 @@ module da_obs
                             da_geo2msl1, da_msl2geo1
    use da_tracing,   only : da_trace_entry, da_trace_exit 
    use module_dm,    only : wrf_dm_sum_real, wrf_dm_sum_reals
+   use da_gpseph,    only : global_adj_ref, global_h_mean, global_h, global_xa_ref, global_ref, &
+      gps_rays
 
    implicit none
 

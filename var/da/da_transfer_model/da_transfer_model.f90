@@ -40,7 +40,7 @@ module da_transfer_model
       t_kelvin, num_fgat_time, num_pseudo, iso_temp, interval_seconds, trajectory_io, &
       ids,ide,jds,jde,kds,kde, ims,ime,jms,jme,kms,kme, num_fft_factors, &
       its,ite,jts,jte,kts,kte, ips,ipe,jps,jpe,kps,kpe, qlimit, &
-      update_sfcdiags, use_wrf_sfcinfo
+      update_sfcdiags, use_wrf_sfcinfo, use_gpsephobs
    use da_control, only: base_pres_strat, base_lapse_strat
    use da_define_structures, only : xbx_type, be_type
    use da_par_util, only : da_patch_to_global
@@ -57,6 +57,7 @@ module da_transfer_model
       da_set_boundary_xb
    use da_tracing, only : da_trace_entry, da_trace_exit, da_trace
    use da_vtox_transforms, only : da_get_vpoles
+   use da_gpseph, only : da_gpseph_init
    ! Do not use line below, because it shows that we are passing a scalar to 
    ! an array
    ! use da_wrf_interfaces, only : wrf_dm_bcast_real

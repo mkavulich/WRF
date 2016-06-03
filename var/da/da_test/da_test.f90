@@ -43,7 +43,8 @@ module da_test
       its,ite,jts,jte,kts,kte, ips,ipe,jps,jpe,kps,kpe, cv_options, cv_size, &
       cloud_cv_options, cp, gas_constant, test_dm_exact, cv_size_domain, &
       its_int, ite_int, jts_int, jte_int, kts_int, kte_int, &
-      ims_int, ime_int, jms_int, jme_int, kms_int, kme_int
+      ims_int, ime_int, jms_int, jme_int, kms_int, kme_int, &
+      typical_eph_rms, gpseph, use_gpsephobs, gpseph_nonlocal, missing_r,missing_data, obs_qc_pointer
 
    use da_define_structures, only : da_zero_x,da_zero_vp_type,da_allocate_y, &
       da_deallocate_y,be_type, xbx_type, iv_type, y_type, j_type, da_initialize_cv
@@ -88,6 +89,7 @@ module da_test
        u6_2, v6_2, w6_2, t6_2, ph6_2, p6, mu6_2, psfc6, moist6
    use da_rain, only : da_transform_xtoy_rain, da_transform_xtoy_rain_adj
 #endif
+   use da_gpseph, only : global_xa_ref
 
    implicit none
 
@@ -110,6 +112,7 @@ contains
 #include "da_check_xtoy_adjoint_airep.inc"
 #include "da_check_xtoy_adjoint_gpspw.inc"
 #include "da_check_xtoy_adjoint_gpsref.inc"
+#include "da_check_xtoy_adjoint_gpseph.inc"
 #include "da_check_xtoy_adjoint_metar.inc"
 #include "da_check_xtoy_adjoint_pilot.inc"
 #include "da_check_xtoy_adjoint_ssmi_rv.inc"

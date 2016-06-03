@@ -734,6 +734,34 @@ subroutine da_write_iv_for_multi_inc(file_index, iv)
       close (ounit)
    end if
 
+   ! [24.1] gpseph obs:
+
+   if (iv%info(gpseph)%plocal(iv%time) - iv%info(gpseph)%plocal(iv%time-1) > 0) then
+
+      open (unit=ounit,file=trim(filename)//'.gpseph',form='formatted',status='replace', &
+         iostat=ios)
+      if (ios /= 0) then
+         call da_error(__FILE__,__LINE__, &
+            (/"Cannot open conventional observation omb file"//filename/))
+      end if
+
+      write(ounit,'(a20,i8)')'gpseph', iv%info(gpseph)%plocal(iv%time) - &
+                                       iv%info(gpseph)%plocal(iv%time-1)
+      do n = iv%info(gpseph)%plocal(iv%time-1) + 1, &
+             iv%info(gpseph)%plocal(iv%time)
+         write(ounit,'(2i8,a5,2E22.13)')&
+                 n, iv%info(gpseph)%levels(n), iv%info(gpseph)%id(n), &  ! Station
+                 iv%info(gpseph)%lat(1,n), &    ! Latitude
+                 iv%info(gpseph)%lon(1,n)       ! Longitude
+         do k = 1 , iv%info(gpseph)%levels(n)
+            write(ounit,'(E22.13,(E22.13,i8,3E22.13))')&
+                     iv%gpseph(n)%h(k), &             ! Obs Height
+                     iv%gpseph(n)%eph(k) ! O-B eph
+         enddo
+      end do
+      close (ounit)
+   end if
+
    ! [25] radar obs:
 
    if (iv%info(radar)%plocal(iv%time) - iv%info(radar)%plocal(iv%time-1) > 0) then

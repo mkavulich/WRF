@@ -943,6 +943,10 @@ subroutine da_transfer_wrftoxb(xbx, grid, config_flags)
 
    deallocate (xbx % latc_mean)
 
+   if ( use_gpsephobs ) then
+      call da_gpseph_init ( grid )
+   end if
+
    if (trace_use) call da_trace_exit("da_transfer_wrftoxb")
 
 end subroutine da_transfer_wrftoxb

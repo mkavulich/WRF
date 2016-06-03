@@ -39,7 +39,7 @@ subroutine da_check_xtoy_adjoint(cv_size, cv, xbx, be, grid, config_flags, iv, y
    real, dimension(ims:ime, jms:jme)          :: x6a2_psfc
    real, dimension(ims:ime, jms:jme, kms:kme) :: x6a2_qcw, x6a2_qci, x6a2_qrn, x6a2_qsn, x6a2_qgr
    real, dimension(:,:,:), allocatable :: a_hr_rainc, a_hr_rainnc
-   integer :: nobwin, i, j, k, fgat_rain
+   integer :: nobwin, i, j, k, ijk, fgat_rain
    character(len=4) :: filnam
    character(len=256) :: timestr
    integer :: time_step_seconds
@@ -252,17 +252,34 @@ print*,__FILE__,jte,' xa2_v.xa2_v for row= ',jte+1,sum(xa2_v(its:ite, jte+1, kts
       end if
 
       if (use_ssmt1obs .or. use_ssmt2obs .or. use_gpspwobs .or. &
-          use_gpsztdobs .or. use_gpsrefobs .or.                 &
+          use_gpsztdobs .or. use_gpsrefobs .or. use_gpsephobs .or. &
           use_ssmitbobs .or. use_ssmiretrievalobs) then
 
          ! Now do something for PW
          call da_transform_xtotpw(grid)
 
          ! GPS Refractivity:
-         if (use_gpsrefobs .or. use_gpsztdobs) then
+         if (use_gpsrefobs .or. use_gpsztdobs .or. use_gpsephobs) then
             call da_transform_xtogpsref_lin(grid)
             if (use_gpsztdobs) call da_transform_xtoztd_lin(grid)
          end if
+
+        if (gpseph_nonlocal) then
+#ifdef DM_PARALLEL
+           ijk = (ide-ids+1)*(jde-jds+1)*(kde-kds+1)
+           !  Collect xb component of ref into global buffer.
+           call da_patch_to_global( grid, grid%xa%ref, global_xa_ref )
+           call wrf_dm_bcast_real( global_xa_ref, ijk )
+#else
+           do k = kds, kde
+              do j = jds, jde
+                 do i = ids, ide
+                    global_xa_ref(i,j,k) = grid%xa%ref(i,j,k)
+                 enddo
+              enddo
+           enddo
+#endif
+        endif
 
          if (use_ssmt1obs .or. use_ssmt2obs .or. &
              use_ssmitbobs .or. use_ssmiretrievalobs) then
@@ -336,6 +353,7 @@ print*,__FILE__,jte,' xa2_v.xa2_v for row= ',jte+1,sum(xa2_v(its:ite, jte+1, kts
       if (iv%info(ships)%nlocal    > 0) call da_check_xtoy_adjoint_ships    (iv, y, partial_lhs, pertile_lhs)
       if (iv%info(gpspw)%nlocal    > 0) call da_check_xtoy_adjoint_gpspw    (iv, y, partial_lhs, pertile_lhs)
       if (iv%info(gpsref)%nlocal   > 0) call da_check_xtoy_adjoint_gpsref   (iv, y, partial_lhs, pertile_lhs)
+      if (iv%info(gpseph)%nlocal   > 0) call da_check_xtoy_adjoint_gpseph   (iv, y, partial_lhs, pertile_lhs)
       if (iv%info(ssmi_tb)%nlocal  > 0) call da_check_xtoy_adjoint_ssmi_tb  (iv, y, partial_lhs, pertile_lhs)
       if (iv%info(ssmi_rv)%nlocal  > 0) call da_check_xtoy_adjoint_ssmi_rv  (iv, y, partial_lhs, pertile_lhs)
       if (iv%info(ssmt2)%nlocal    > 0) call da_check_xtoy_adjoint_ssmt1    (iv, y, partial_lhs, pertile_lhs)
@@ -396,7 +414,7 @@ print*,__FILE__,jte,' grid%xa%v.grid%x%%v for row= ',jte+1,sum(grid%xa%v(its:ite
    end if
 
       if (use_ssmt1obs .or. use_ssmt2obs .or. use_gpspwobs .or. &
-          use_gpsztdobs .or. use_gpsrefobs .or.                 &
+          use_gpsztdobs .or. use_gpsrefobs .or. use_gpsephobs .or. &
           use_ssmitbobs .or. use_ssmiretrievalobs) then
 
          if (use_ssmitbobs) call da_transform_xtotb_adj (grid)
@@ -405,7 +423,7 @@ print*,__FILE__,jte,' grid%xa%v.grid%x%%v for row= ',jte+1,sum(grid%xa%v(its:ite
          call da_transform_xtotpw_adj (grid)
 
          ! GPS Refractivity:
-         if (use_gpsrefobs .or. use_gpsztdobs) then
+         if (use_gpsrefobs .or. use_gpsztdobs .or. use_gpsephobs) then
             if (use_gpsztdobs) call da_transform_xtoztd_adj(grid)
             call da_transform_xtogpsref_adj (grid)
          end if

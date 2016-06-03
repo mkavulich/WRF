@@ -202,6 +202,17 @@
    end if
 #endif
 
+   if ( use_gpsrefobs .and. use_gpsephobs ) then
+      write(unit=message(1),fmt='(A,I3)') &
+         'Both use_gpsrefobs and use_gpsephobs are true. Should choose either use_gpsrefobs or use_gpsephobs'
+      call da_error(__FILE__,__LINE__,message(1:1))
+   end if
+
+   if ( use_gpsephobs ) then
+      gpseph_nonlocal = .true.
+      ob_format_gpsro = ob_format_bufr
+   end if
+
    !---------------------------------------------------------------------------
    ! [2.0] Initialise wrfvar parameters:
    !---------------------------------------------------------------------------
@@ -860,6 +871,9 @@
         deallocate (eignval)
      end if
 
+      !if ( gpseph_nonlocal ) then
+      !   call da_gpseph_final ( )
+      !endif
 
    end do
 

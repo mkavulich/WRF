@@ -87,7 +87,12 @@ subroutine da_initialize_rad_iv (i, n, iv, p)
    ! iv%instid(i)%scanline(n)    = p%scanline
    iv%instid(i)%scanline(n)     = 0
    iv%instid(i)%ifgat(n)        = p%ifgat
-   iv%instid(i)%cloud_flag(:,n) = qc_good  ! no cloud
+   if ( index(iv%instid(i)%rttovid_string, 'imager') > 0 .and. &
+        imager_format == 1 ) then
+      iv%instid(i)%cloud_flag(:,n) = p%cloud_flag
+   else
+      iv%instid(i)%cloud_flag(:,n) = qc_good  ! no cloud
+   end if
    iv%instid(i)%rain_flag(n)    = 0        ! no rain;  1:rain
    iv%instid(i)%satzen(n)       = p%satzen
    iv%instid(i)%satazi(n)       = p%satazi

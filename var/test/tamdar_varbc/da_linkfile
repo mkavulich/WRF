@@ -1,0 +1,30 @@
+         echo "Running VAR"
+         date
+
+         ln -sf fg .
+         ln -sf ep01 .
+         ln -sf be_d0${domain}.dat .
+
+         ln -sf crtm_coeffs .
+         ln -sf radiance_info .
+
+         ln -sf ob.ascii .
+         ln -sf amsua.bufr .
+
+         ln -sf VARBC_TAMDAR.in .
+         ln -sf VARBC.in .
+         ln -sf clavrx_goes13_*.level2.hdf ./HDFIMAGER-13.hdf
+
+         if [[ $domain == 02 ]]; then
+            ln -sf ${d_blend}/d01/${sdate}/fg ./fg_ens
+         fi
+
+         if [[ $sdate != $cs_date ]]; then
+            rm VARBC.in
+            ln -sf ../${cycle_date}/VARBC.out ./VARBC.in
+         fi
+
+#         if [[ $sdate != $cs_date ]]; then
+#            rm VARBC_TAMDAR.in
+#            ln -sf ../${cycle_date}/VARBC_TAMDAR.out ./VARBC_TAMDAR.in
+#         fi

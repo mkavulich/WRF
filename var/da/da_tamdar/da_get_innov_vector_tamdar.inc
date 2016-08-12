@@ -157,14 +157,24 @@ subroutine da_get_innov_vector_tamdar (it, num_qcstat_conv, grid, ob, iv)
              end if
           end if
 
-
-             if (ob%tamdar(n)%t(k) > missing_r .AND. iv%tamdar(n)%t(k)%qc >= obs_qc_pointer) then
+          if (ob%tamdar(n)%t(k) > missing_r .AND. iv%tamdar(n)%t(k)%qc >= obs_qc_pointer) then
+              iv%tamdar(n)%t(k)%inv = ob%tamdar(n)%t(k) - model_t(k,n)
+          elseif(ob%tamdar(n)%t(k) > missing_r .AND. iv%tamdar(n)%t(k)%qc == -55) then
+              if( abs( ob%tamdar(n)%t(k) - model_t(k,n) ) < varbc_tamdar_tiv ) then
                  iv%tamdar(n)%t(k)%inv = ob%tamdar(n)%t(k) - model_t(k,n)
-             end if
+                 iv%tamdar(n)%t(k)%qc = 55
+              end if
+          end if
 
-             if (ob%tamdar(n)%q(k) > missing_r .AND. iv%tamdar(n)%q(k)%qc >= obs_qc_pointer) then
+          if (ob%tamdar(n)%q(k) > missing_r .AND. iv%tamdar(n)%q(k)%qc >= obs_qc_pointer) then
+              iv%tamdar(n)%q(k)%inv = ob%tamdar(n)%q(k) - model_q(k,n)
+          elseif(ob%tamdar(n)%q(k) > missing_r .AND. iv%tamdar(n)%q(k)%qc == -55) then
+              if( abs( ob%tamdar(n)%q(k) - model_q(k,n) ) < varbc_tamdar_qiv ) then
                  iv%tamdar(n)%q(k)%inv = ob%tamdar(n)%q(k) - model_q(k,n)
-             end if
+                 iv%tamdar(n)%q(k)%qc = 55
+              end if
+          end if
+
       end do
    end do
 

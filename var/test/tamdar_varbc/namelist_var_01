@@ -1,0 +1,147 @@
+&wrfvar1
+/
+&wrfvar2
+/
+&wrfvar3
+ ob_format=2
+/
+&wrfvar4
+ use_amsuaobs=.true.
+ use_goesimgobs=.true.
+ use_varbc_tamdar=1
+ varbc_tamdar_var=T,F,
+ varbc_tamdar_nobsmin=8,
+ varbc_tamdar_nbgerr=500,
+ varbc_tamdar_param_sen=0.33,
+ varbc_tamdar_qiv=0.001,
+ varbc_tamdar_tiv=1.5,
+ varbc_tamdar_factor=1.0,
+ varbc_tamdar_tune_bc=0.1
+/
+&wrfvar5
+/
+&wrfvar6
+ max_ext_its=1
+/
+&wrfvar7
+ cv_options=5,
+ je_factor=1.33,
+ var_scaling1=0.5
+ var_scaling2=0.5
+ var_scaling3=0.5
+ var_scaling4=0.5
+ var_scaling5=0.5
+/
+&wrfvar8
+/
+&wrfvar9
+/
+&wrfvar10
+/
+&wrfvar11
+calculate_cg_cost_fn=true,
+/
+&wrfvar12
+/
+&wrfvar13
+/
+&wrfvar14
+ rtminit_nsensor=6,
+ rtminit_platform=4,1,1,1,1,10,9,1,1,1,10,9,1,1,1
+ rtminit_satid=13,15,16,18,19,2,2,2,16,17,18,2,2,16,17,18
+ rtminit_sensor=22,3,3,3,3,3,16,11,4,4,15,15,11,0,0,0
+ thinning_mesh=30.0,120.0,120.0,120.0,120.0,120.0,120.0,60.0,60.0,60.0,60.0,60.0,60.0,60.0,60.0,60.0,60.0
+ thinning=true,
+ qc_rad=true,
+ varbc_nbgerr=5000,
+ write_iv_rad_ascii=false,
+ write_oa_rad_ascii=true,
+ rtm_option=2,
+ only_sea_rad=true,
+ use_varbc=true,
+ use_crtm_kmatrix=true,
+ use_clddet_mmr=true,
+ use_satcv=false,false,
+ crtm_mwwater_coef="FASTEM5.MWwater.EmisCoeff.bin",
+ crtm_irland_coef="IGBP.IRland.EmisCoeff.bin",
+ imager_format=2,
+/
+&wrfvar15
+/
+&wrfvar16
+ rden_bin=1
+ ep_para_read=2
+ use_4denvar=.false.
+ ensdim_alpha=80
+ alphacv_method=2
+ alpha_corr_type=3
+ alpha_corr_scale=200.0
+ alpha_std_dev=1.000
+ alpha_vertloc=.true.
+/
+&wrfvar17
+/
+&wrfvar18
+analysis_date="Tana",
+/
+&wrfvar19
+/
+&wrfvar20
+/
+&wrfvar21
+time_window_min="Tmin",
+/
+&wrfvar22
+time_window_max="Tmax",
+/
+&wrfvar23
+/
+&time_control
+start_year=syy,
+start_month=smm,
+start_day=sdd,
+start_hour=shh,
+end_year=syy,
+end_month=smm,
+end_day=sdd,
+end_hour=shh,
+/
+&fdda
+/
+&domains
+e_we=400,
+e_sn=300,
+e_vert=51,
+dx=12000,
+dy=12000,
+/
+&dfi_control
+/
+&tc
+/
+&physics
+mp_physics=10,
+ra_lw_physics=1,
+ra_sw_physics=2,
+radt=5,
+sf_sfclay_physics=1,
+sf_surface_physics=2,
+bl_pbl_physics=1,
+cu_physics=5,
+cudt=0,
+num_land_cat=20,
+num_soil_cat=19,
+num_soil_layers=4,
+/
+&scm
+/
+&dynamics
+/
+&bdy_control
+/
+&grib2
+/
+&fire
+/
+&namelist_quilt
+/

@@ -22,6 +22,7 @@ WRFVAR_OBJS = \
    da_sound.o \
    da_mtgirs.o \
    da_tamdar.o \
+   da_varbc_tamdar.o \
    da_bogus.o \
    da_airep.o \
    da_pilot.o \
@@ -434,6 +435,7 @@ da_varbc.o :
 	  $(FC) -c $(FCFLAGS) $(PROMOTION) $(CRTM_SRC) $(RTTOV_SRC) $*.f ; \
         fi
 
+da_varbc_tamdar.o \
 da_test.o \
 da_transfer_model.o \
 da_minimisation.o :

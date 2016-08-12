@@ -1,5 +1,5 @@
 subroutine da_calculate_gradj(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size_jp, &
-                              cv_size_jl, xbx, be, iv, cv, y, grad, grid, config_flags, re )
+                              cv_size_jl, cv_size_ja, xbx, be, iv, cv, y, grad, grid, config_flags, re )
 
    !---------------------------------------------------------------------------
    ! Purpose: Calculates the gradient of the cost function w/r to cv
@@ -15,7 +15,7 @@ subroutine da_calculate_gradj(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size
    integer, intent(in)                :: it     ! external iteration #.
    integer, intent(in)                :: iter   ! internal iteration #.
    integer, intent(in)                :: cv_size    ! Total cv size.
-   integer, intent(in)                :: cv_size_jb, cv_size_je, cv_size_jp, cv_size_jl
+   integer, intent(in)                :: cv_size_jb, cv_size_je, cv_size_jp, cv_size_jl, cv_size_ja(2)
    type (xbx_type),intent(inout)      :: xbx    ! For header & non-grid arrays.
    type (be_type), intent(in)         :: be     ! background error structure.
    type (iv_type), intent(inout)      :: iv     ! innovation vector (o-b).
@@ -43,7 +43,8 @@ subroutine da_calculate_gradj(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size
    real             :: grad_jp(cv_size)
    real             :: grad_js(cv_size)
    real             :: grad_jl(cv_size)
-   real             :: gnorm_j, gnorm_jo, gnorm_jb, gnorm_je, gnorm_jd, gnorm_jp, gnorm_js, gnorm_jl
+   real             :: grad_ja(cv_size,2)
+   real             :: gnorm_j, gnorm_jo, gnorm_jb, gnorm_je, gnorm_jd, gnorm_jp, gnorm_js, gnorm_jl, gnorm_ja(2)
    logical          :: jcdf_flag
 
    ! Variables for VarBC background constraint
@@ -51,6 +52,8 @@ subroutine da_calculate_gradj(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size
    integer                           :: inst, ichan, npred, ipred, id
    real                              :: bgerr
    integer                           :: n
+
+   integer                           :: ja_start(2), ja_end(2), ivar, iphase
 
    if (trace_use) call da_trace_entry("da_calculate_gradj")
 
@@ -68,6 +71,11 @@ subroutine da_calculate_gradj(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size
    jp_end     = cv_size_jb + cv_size_je + cv_size_jp
    jl_start   = cv_size_jb + cv_size_je + cv_size_jp + 1
    jl_end     = cv_size_jb + cv_size_je + cv_size_jp + cv_size_jl
+
+   ja_start(1) = jl_end + 1
+   ja_end(1)   = jl_end + cv_size_ja(1)
+   ja_start(2) = ja_end(1) + 1
+   ja_end(2)   = ja_end(1) + cv_size_ja(2)
    
    grad_jo = 0.0
    grad_jb = 0.0
@@ -76,6 +84,7 @@ subroutine da_calculate_gradj(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size
    grad_jp = 0.0
    grad_js = 0.0
    grad_jl = 0.0
+   grad_ja(:,:) = 0.0
 
    jcdf_flag = .false.
 
@@ -181,10 +190,34 @@ subroutine da_calculate_gradj(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size
    !-------------------------------------------------------------------------
    if (cv_size_jl > 0) grad_jl(jl_start:jl_end) = cv(jl_start:jl_end)
 
+   !-------------------------------------------------------------------------
+   ! [6.1] calculate grad_v (ja):
+   !-------------------------------------------------------------------------
+   if( use_varbc_tamdar > 0 ) then
+      do ivar = 1, iv%tamdar_varbc(1)%nbcvar
+         if( cv_size_ja(ivar) > 0 ) then
+            do n = 1, iv%tamdar_varbc(ivar)%ntflight
+               do iphase = 1, iv%tamdar_varbc(ivar)%nphase
+                  if( iv%tamdar_varbc(ivar)%nobs_sum(n,iphase) >= varbc_tamdar_nobsmin .and. &
+                      iv%tamdar_varbc(ivar)%nobs(n,iphase) > 0 .and. iv%tamdar_varbc(ivar)%ifuse(n,iphase) > 0 ) then
+                      do ipred = 1, iv%tamdar_varbc(ivar)%npred
+                         id     = iv%tamdar_varbc(ivar)%index(ipred,n,iphase)
+                         bgerr  = iv%tamdar_varbc(ivar)%bgerr(ipred,n,iphase)
+                         if (bgerr > 0.0) &
+                            grad_ja(id,ivar) = (1/sqrt(bgerr)) * &
+                                          SUM(cv(id) * iv%tamdar_varbc(ivar)%vtox(ipred,1:npred,n,iphase))
+                      end do
+                  end if
+               end do
+            end do
+         end if
+      end do
+   end if
+
    !--------------------------------------------------------------------------------------------------
    ! [7.0] calculate grad_v (j) = grad_v (jb) + grad_v (jo) + grad_v (je) + grad_v (jd) + grad_v (jp) + grad_v (js) + grad_v (jl)
    !--------------------------------------------------------------------------------------------------   
-   grad = grad_jo + grad_jb + grad_je + grad_jd + grad_jp + grad_js + grad_jl
+   grad = grad_jo + grad_jb + grad_je + grad_jd + grad_jp + grad_js + grad_jl + grad_ja(:,1) + grad_ja(:,2)
 
    !-------------------------------------------------------------------------
    ! [8.0] write Gradient:
@@ -198,10 +231,12 @@ subroutine da_calculate_gradj(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size
       gnorm_jp = sqrt(da_dot_cv(cv_size, grad_jp, grad_jp, grid, mz, jp_start, jp_end))
       gnorm_js = sqrt(da_dot_cv(cv_size, grad_js, grad_js, grid, mz))
       gnorm_jl = sqrt(da_dot_cv(cv_size, grad_jl, grad_jl, grid, mz))
+      gnorm_ja(1) = sqrt(da_dot_cv(cv_size, grad_ja(:,1), grad_ja(:,1), grid, mz))
+      gnorm_ja(2) = sqrt(da_dot_cv(cv_size, grad_ja(:,2), grad_ja(:,2), grid, mz))
  
       if (rootproc) &
-         write(grad_unit,fmt='(2x,i2,1x,e10.3,2x,i4,8(1x,f10.3))') & 
-               it, eps(it), iter, gnorm_j, gnorm_jb, gnorm_jo, gnorm_je, gnorm_jd, gnorm_jp, gnorm_js, gnorm_jl
+         write(grad_unit,fmt='(2x,i2,1x,e10.3,2x,i4,10(1x,f10.3))') & 
+               it, eps(it), iter, gnorm_j, gnorm_jb, gnorm_jo, gnorm_je, gnorm_jd, gnorm_jp, gnorm_js, gnorm_jl, gnorm_ja(1), gnorm_ja(2)
    end if
    if (trace_use) call da_trace_exit("da_calculate_gradj")
 

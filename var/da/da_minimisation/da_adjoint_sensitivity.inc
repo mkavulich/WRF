@@ -31,6 +31,7 @@ subroutine da_adjoint_sensitivity(grid, config_flags, cv_size, xbx, be, iv, xhat
    integer                           :: i, j, mz(6)
    integer                           :: jp_start, jp_end       ! Start/end indices of Jp.
    real                              :: value
+   integer                           :: zero(2)
 
    if (trace_use) call da_trace_entry("da_adjoint_sensitivity")
    
@@ -65,7 +66,8 @@ subroutine da_adjoint_sensitivity(grid, config_flags, cv_size, xbx, be, iv, xhat
     ! Jo for all observations
     !------------------------
       call da_allocate_y (iv, re)
-      call da_calculate_j(1,1,cv_size,0,0,0,0,xbx,be,iv,xhat,cv,re,y,j_cost,shat,grid,config_flags)
+      zero(: ) = 0
+      call da_calculate_j(1,1,cv_size,0,0,0,0,zero,xbx,be,iv,xhat,cv,re,y,j_cost,shat,grid,config_flags)
       call da_deallocate_y(re)
 			    
    case default;

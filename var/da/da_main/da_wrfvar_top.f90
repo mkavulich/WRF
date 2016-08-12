@@ -83,6 +83,9 @@ module da_wrfvar_top
       da_llxy_default,da_llxy_wrf,da_xyll,da_diff_seconds,da_map_set, &
       da_set_boundary_xb,da_togrid
 
+   use da_varbc_tamdar, only : da_varbc_tamdar_init, da_varbc_tamdar_pred, &
+                               da_varbc_tamdar_update
+
 #ifdef CRTM
    use module_radiance, only : crtm_destroy
    use da_crtm, only : channelinfo, sensor_descriptor

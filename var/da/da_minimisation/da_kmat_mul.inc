@@ -34,6 +34,7 @@ subroutine da_kmat_mul(grid, config_flags,            &
    integer, intent(in)               :: neign
 
    real                              :: shat(1:cv_size)          ! cv copy.
+   integer                           :: zero(2)
 
    if (trace_use) call da_trace_entry("da_kmat_mul")
 
@@ -44,7 +45,8 @@ subroutine da_kmat_mul(grid, config_flags,            &
    call da_calculate_residual(iv,y,re)
 	    
  ! H^T.R^-1.[y^o-H(x_b)]
-   call da_calculate_gradj(1,1,cv_size,0,0,0,0,xbx,be,iv,cv,y,shat,grid,config_flags,re)
+   zero(:) = 0
+   call da_calculate_gradj(1,1,cv_size,0,0,0,0,zero,xbx,be,iv,cv,y,shat,grid,config_flags,re)
    shat = - shat    !! Compensate for sign in calculation of grad_v (Jo)
 	    
  ! A.H^T.R^-1.[y^o-H(x_b)]

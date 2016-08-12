@@ -53,7 +53,9 @@ module da_minimisation
       orthonorm_gradient, its, ite, jts, jte, kts, kte, ids, ide, jds, jde, kds, kde, cp, &
       use_satcv, sensitivity_option, print_detail_outerloop, adj_sens, filename_len, &
       ims, ime, jms, jme, kms, kme, ips, ipe, jps, jpe, kps, kpe, fgat_rain_flags, var4d_bin_rain, freeze_varbc, &
-      use_wpec, wpec_factor
+      use_wpec, wpec_factor, &
+      use_varbc_tamdar, varbc_tamdar_factor, varbc_tamdar_nobsmin, &
+      varbc_tamdar_unit
    use da_define_structures, only : iv_type, y_type,  j_type, be_type, &
       xbx_type, jo_type, da_allocate_y,da_zero_x,da_zero_y,da_deallocate_y, &
       da_zero_vp_type, qhat_type
@@ -104,6 +106,9 @@ module da_minimisation
       da_ao_stats_tamdar_sfc, da_oi_stats_tamdar_sfc,da_oi_stats_tamdar_sfc, &
       da_get_innov_vector_tamdar_sfc, &
       da_jo_and_grady_tamdar_sfc, da_residual_tamdar_sfc
+
+   use da_varbc_tamdar, only : da_varbc_tamdar_tl, da_varbc_tamdar_adj, &
+      da_varbc_tamdar_direct, da_varbc_tamdar_precond
 
 #if defined(RTTOV) || defined(CRTM)
    use da_radiance, only : da_calculate_grady_rad, da_write_filtered_rad, &

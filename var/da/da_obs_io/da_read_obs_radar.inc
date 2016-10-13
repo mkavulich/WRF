@@ -292,6 +292,18 @@ subroutine da_read_obs_radar (iv, filename, grid)
                   allocate (iv % radar (ilocal) % model_qci(1:iv%info(radar)%max_lev))
                   allocate (iv % radar (ilocal) % model_qsn(1:iv%info(radar)%max_lev))
                   allocate (iv % radar (ilocal) % model_qgr(1:iv%info(radar)%max_lev))
+
+                  allocate (iv % radar (ilocal) % bg_qv    (1:iv%info(radar)%max_lev)) ! by KNU_MML
+                  allocate (iv % radar (ilocal) % bg_qcl   (1:iv%info(radar)%max_lev)) ! by KNU_MML
+                  allocate (iv % radar (ilocal) % bg_qci   (1:iv%info(radar)%max_lev)) ! by KNU_MML
+                  allocate (iv % radar (ilocal) % bg_qrn   (1:iv%info(radar)%max_lev)) ! by KNU_MML
+                  allocate (iv % radar (ilocal) % bg_qsn   (1:iv%info(radar)%max_lev)) ! by KNU_MML
+                  allocate (iv % radar (ilocal) % bg_qgr   (1:iv%info(radar)%max_lev)) ! by KNU_MML
+                  allocate (iv % radar (ilocal) % bg_qvsw  (1:iv%info(radar)%max_lev)) ! by KNU_MML
+                  allocate (iv % radar (ilocal) % bg_qvsi  (1:iv%info(radar)%max_lev)) ! by KNU_MML
+                  allocate (iv % radar (ilocal) % bg_rf    (1:iv%info(radar)%max_lev)) ! by KNU_MML
+                  allocate (iv % radar (ilocal) % bg_cb                              ) ! by KNU_MML
+
                   allocate (iv % radar (ilocal) % height   (1:iv%info(radar)%max_lev))
                   allocate (iv % radar (ilocal) % height_qc(1:iv%info(radar)%max_lev))
                   allocate (iv % radar (ilocal) % rv       (1:iv%info(radar)%max_lev))

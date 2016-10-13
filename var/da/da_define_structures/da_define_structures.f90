@@ -219,6 +219,17 @@ module da_define_structures
       real, pointer           :: model_qgr(:)
       real                    :: model_ps
 
+      real, pointer           :: bg_qv (:) ! by KNU_MML
+      real, pointer           :: bg_qcl(:) ! by KNU_MML
+      real, pointer           :: bg_qci(:) ! by KNU_MML
+      real, pointer           :: bg_qrn(:) ! by KNU_MML
+      real, pointer           :: bg_qsn(:) ! by KNU_MML
+      real, pointer           :: bg_qgr(:) ! by KNU_MML
+      real, pointer           :: bg_qvsw(:) ! by KNU_MML
+      real, pointer           :: bg_qvsi(:) ! by KNU_MML
+      real, pointer           :: bg_rf(:) ! by KNU_MML
+      real, pointer           :: bg_cb    ! by KNU_MML
+
       real                  , pointer :: height   (:) ! Height in m
       integer               , pointer :: height_qc(:) ! Height QC
 

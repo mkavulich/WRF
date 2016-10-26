@@ -52,7 +52,7 @@ CONTAINS
 
 
    SUBROUTINE end_timing ( string )
-     use module_wrf_error, only: silence, stderrlog, buffered
+     use module_wrf_error, only: silence, stderrlog, buffered, wrf_at_debug_level
    
       IMPLICIT NONE
       REAL(kind=8) :: now_hires
@@ -84,15 +84,17 @@ CONTAINS
 #endif
       elapsed_seconds_total = elapsed_seconds_total + elapsed_seconds
 
+      IF ( wrf_at_debug_level(1) ) THEN
 3031 format("Timing for ",A,": ",F10.5," elapsed seconds")
-      if(buffered/=0) then
-         write(buf,3031) TRIM(string),elapsed_seconds
-         call wrf_message(buf)
-      else
-         if(stderrlog/=0) &
-              write(0,3031) TRIM(string),elapsed_seconds
-         write(6,3031) TRIM(string),elapsed_seconds
-      endif
+         if(buffered/=0) then
+            write(buf,3031) TRIM(string),elapsed_seconds
+            call wrf_message(buf)
+         else
+            if(stderrlog/=0) &
+                 write(0,3031) TRIM(string),elapsed_seconds
+            write(6,3031) TRIM(string),elapsed_seconds
+         endif
+      ENDIF
 
 !     cpu_seconds = cpu_2 - cpu_1
 !     cpu_seconds_total = cpu_seconds_total + cpu_seconds

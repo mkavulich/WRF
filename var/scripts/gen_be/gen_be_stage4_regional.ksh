@@ -55,6 +55,7 @@ for VARIABLE in $CONTROL_VARIABLES; do
 
    while [[ $VINDEX -le $MAX_VINDEX ]]; do
       export TMP_DIR1=${TMP_DIR}/dir.${VARIABLE}${VINDEX}
+      rm -rf ${TMP_DIR1} 2> /dev/null
       mkdir ${TMP_DIR1} 2> /dev/null
       cd ${TMP_DIR1}
 
@@ -84,10 +85,11 @@ EOF
       if $LOCAL; then
          if $SMPAR; then
             echo "Submitting job for variable $VARIABLE and vertical index $VINDEX using SMPAR"
-            export OMP_NUM_THREADS=32
+            export OMP_NUM_THREADS=4
             JJ=gen_be_stage4_regional_${VARIABLE}_${VINDEX}
             # "-K" means "wait for job to complete":
-            bsub -e ${JJ}.err -J $JJ -K -n 1 -o ${JJ}.out -P 64000510 -q debug -R "span[ptile=${OMP_NUM_THREADS}]" -W 6:00 ./gen_be_stage4_regional.exe
+            bsub -a poe -e ${JJ}.err -J $JJ -n 4 -o ${JJ}.out -P ${YSPROJECT} -q ${YSQUEUE} -R "span[ptile=${OMP_NUM_THREADS}]" -W 2:00 ./gen_be_stage4_regional.exe
+            JOBSACTIVE=true
          else
             echo "Submitting job for variable $VARIABLE and vertical index $VINDEX on local machine"
             ./gen_be_stage4_regional.exe > gen_be_stage4_regional_${VARIABLE}_${VINDEX}.out 2>&1 &
@@ -110,6 +112,23 @@ EOF
    done  # End loop over VINDEX.
 
    if ${USE_RFi};then
+      if $SMPAR; then
+         #If SMPAR, make sure all levels are complete
+         while $JOBSACTIVE; do
+            JOBSACTIVE=false
+            for I in {1..$MAX_VINDEX}
+            do
+               if [[ ! -e "${TMP_DIR}/dir.${VARIABLE}${I}/DONE" ]]; then
+                  JOBSACTIVE=true # Jobs still active; break for loop and start while loop over.
+                  echo "There are still active jobs! ${TMP_DIR}/dir.${VARIABLE}${I}/DONE does not exist!"
+                  sleep 10
+                  break
+               fi
+            done
+         done
+         echo "All levels done!"
+      fi
+
       # Collect files together: 
       let VINDEX=1
       cp ${TMP_DIR}/dir.${VARIABLE}${VINDEX}/sl_* ${WORK_DIR}/${VARIABLE}/sl_print.${VARIABLE}

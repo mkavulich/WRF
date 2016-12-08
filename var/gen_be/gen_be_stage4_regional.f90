@@ -223,6 +223,9 @@ program gen_be_stage4_regional
          write(ounit)sd
          close(ounit)
       endif
+      open (unit=ounit,file="DONE",action="write",status="replace")
+      write (ounit,*) 'sl_print.'//trim(variable)//'.'//ck//' is written'
+      close (ounit)
    else 
 !---------------------------------------------------------------------------------------------
       write(6,'(" [3] Compute wavelet standard deviations.")')

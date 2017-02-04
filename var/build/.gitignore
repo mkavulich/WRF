@@ -7,7 +7,9 @@
 # Ignored file types should include executables, build-time temporary files, #
 # and other files which should not ever be added to the code repository.     #
 ##############################################################################
+*.F
 *.f
+*.F90
 *.f90
 *.inc
 *.c

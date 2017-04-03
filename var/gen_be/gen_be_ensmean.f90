@@ -15,6 +15,8 @@ program gen_be_ensmean
 
    use da_control, only : stdout, stderr,filename_len
    use da_reporting, only : da_error,message
+   use, intrinsic :: iso_c_binding,                       &
+                     ONLY: c_int32_t, C_CHAR, C_NULL_CHAR
 
    implicit none
 

@@ -1,6 +1,7 @@
 # gen_be
 
 GEN_BE_OBJS = da_etkf.o \
+        copyfile.o \
 	da_blas.o \
 	da_lapack.o \
 	da_gen_be.o \

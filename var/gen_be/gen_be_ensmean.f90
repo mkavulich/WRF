@@ -90,14 +90,20 @@ program gen_be_ensmean
    write(6,'(a,i4)')'   Number of variables to average = ', nv
    write(6,'(50a)')'   List of variables to average = ', cv(1:nv)
 
-!  Create template ensemble mean from first ensemble file
+!  Create template ensemble mean and variance files from first ensemble file
    input_file = trim(directory)//'/'//trim(filename)//'.mean'
    tmplt_file = trim(directory)//'/'//trim(filename)//'.e001'
    rcode = copyfile(trim(tmplt_file)//C_NULL_CHAR, trim(input_file)//C_NULL_CHAR)
    if ( rcode /= 0 ) then
-      write(UNIT=message(1),FMT='(A)') "Failed to create "//trim(input_file)//"from "//trim(tmplt_file)
-        call da_error(__FILE__,__LINE__,message(1:1))
-     endif
+      write(UNIT=message(1),FMT='(A)') "Failed to create "//trim(input_file)//" from "//trim(tmplt_file)
+      call da_error(__FILE__,__LINE__,message(1:1))
+   endif
+   input_file = trim(directory)//'/'//trim(filename)//'.vari'
+   rcode = copyfile(trim(tmplt_file)//C_NULL_CHAR, trim(input_file)//C_NULL_CHAR)
+   if ( rcode /= 0 ) then
+      write(UNIT=message(1),FMT='(A)') "Failed to create "//trim(input_file)//" from "//trim(tmplt_file)
+      call da_error(__FILE__,__LINE__,message(1:1))
+   endif
 
 !  Open template ensemble mean with write access:
    length = len_trim(input_file)

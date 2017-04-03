@@ -18,15 +18,23 @@ program gen_be_ensmean
 
    implicit none
 
+  INTERFACE
+    integer(c_int32_t) function copyfile(ifile, ofile) bind(c)
+      import :: c_int32_t, C_CHAR
+      CHARACTER(KIND=C_CHAR), DIMENSION(*), intent(in) :: ifile, ofile
+    END function copyfile
+  END INTERFACE
+
 #include "netcdf.inc"
 
    integer, parameter    :: max_num_dims = 4          ! Maximum number of dimensions.
    integer, parameter    :: max_num_vars = 50         ! Maximum number of variables.
    integer, parameter    :: unit = 100                ! Unit number.
 
-   character (len=filename_len)   :: directory                 ! General filename stub.
-   character (len=filename_len)   :: filename                  ! General filename stub.
-   character (len=filename_len)   :: input_file                ! Input file. 
+   character (len=filename_len)   :: directory        ! General filename stub.
+   character (len=filename_len)   :: filename         ! General filename stub.
+   character (len=filename_len)   :: input_file       ! Input file. 
+   character (len=filename_len)   :: tmplt_file       ! Template file to create .mean file
    character (len=10)    :: var                       ! Variable to search for.
    character (len=3)     :: ce                        ! Member index -> character.
 
@@ -80,8 +88,16 @@ program gen_be_ensmean
    write(6,'(a,i4)')'   Number of variables to average = ', nv
    write(6,'(50a)')'   List of variables to average = ', cv(1:nv)
 
-!  Open template ensemble mean with write access:
+!  Create template ensemble mean from first ensemble file
    input_file = trim(directory)//'/'//trim(filename)//'.mean'
+   tmplt_file = trim(directory)//'/'//trim(filename)//'.e001'
+   rcode = copyfile(trim(tmplt_file)//C_NULL_CHAR, trim(input_file)//C_NULL_CHAR)
+   if ( rcode /= 0 ) then
+      write(UNIT=message(1),FMT='(A)') "Failed to create "//trim(input_file)//"from "//trim(tmplt_file)
+        call da_error(__FILE__,__LINE__,message(1:1))
+     endif
+
+!  Open template ensemble mean with write access:
    length = len_trim(input_file)
    rcode = nf_open(input_file(1:length), NF_WRITE, cdfid_mean )
    if ( rcode /= 0) then

@@ -1,6 +1,7 @@
 module da_obs_io
 
    use module_domain, only : domain
+   use module_dm,     only : wrf_dm_sum_integer
 
    use da_control, only : xmiss, missing_r, fmt_each, fmt_info, trace_use, &
       fmt_srfc, filtered_obs_unit, num_procs,missing, ierr,comm, rand_unit, &

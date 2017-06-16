@@ -6,12 +6,12 @@ subroutine da_get_time_slots(nt,tmin,tana,tmax,time_slots,itime_ana)
 
    implicit none
 
-   integer,           intent (in)      :: nt    ! number of time slots
-   character(len=19), intent (in)      :: tmin  ! begin of time window
-   character(len=19), intent (in)      :: tana  ! analysis time
-   character(len=19), intent (in)      :: tmax  ! end of time window
+   integer,           intent (in)      :: nt               ! number of time slots
+   character(len=19), intent (in)      :: tmin             ! begin of time window
+   character(len=19), intent (in)      :: tana             ! analysis time
+   character(len=19), intent (in)      :: tmax             ! end of time window
    real*8,           intent (out)      :: time_slots(0:nt) !
-   integer,          intent (out)      :: itime_ana ! first guess index of analysis time
+   integer,          intent (out)      :: itime_ana        ! first guess index of analysis time
 
    integer   :: ana_yyyy,ana_mm,ana_dd,ana_hh,ana_mn,ana_ss
    integer   :: min_yyyy,min_mm,min_dd,min_hh,min_mn,min_ss
@@ -36,6 +36,14 @@ subroutine da_get_time_slots(nt,tmin,tana,tmax,time_slots,itime_ana)
    call da_get_julian_time(ana_yyyy,ana_mm,ana_dd,ana_hh,ana_mn,time_ana)
    call da_get_julian_time(min_yyyy,min_mm,min_dd,min_hh,min_mn,time_slots(0))
    call da_get_julian_time(max_yyyy,max_mm,max_dd,max_hh,max_mn,time_slots(nt))
+
+   if (time_slots(0) > time_slots(nt)) then
+      write(unit=message(1),fmt='(A)') &
+           'time_window_min must be before time_window_max! Change namelist values and re-run.'
+      write(unit=message(2),fmt='(A,A)')'time_window_min = ',tmin
+      write(unit=message(3),fmt='(A,A)')'time_window_max = ',tmax
+      call da_error(__FILE__,__LINE__,message(1:3))
+   endif      
 
    ! dt/2 between time_slots 0 and 1
    ! dt/2 between time_slots nt-1 and nt

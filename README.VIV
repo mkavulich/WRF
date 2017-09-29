@@ -1,0 +1,18 @@
+This READEME file lists the major changes for WRF Version 4 that may be of interest to developers
+
+
+1. The old WRFV2-era configure system is removed, including the following files:
+D       arch/Config.pl
+D       arch/Config_old.pl
+D       arch/archive_configure.defaults
+D       arch/config_old
+D       arch/configure_old.defaults
+D       arch/postamble_old
+D       arch/preamble_old
+
+2. The NUP utility (nup.exe) has been depreciated since version 3.7, and is now removed entirely:
+D       main/nup_em.F
+
+3. Support for compilers not compliant with MPI2 standards has been removed.
+
+

@@ -76,6 +76,8 @@ foreach a ( $argv )
     set prev_was_j = true
   else if ( "$prev_was_j" == "true" ) then
     set prev_was_j = false
+  else if ( "$a" ==  "io" ) then
+    set arglist = ( $arglist $a )
   else
     echo "This option is not recognized: $a"
     exit ( 1 )
